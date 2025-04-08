@@ -1,19 +1,22 @@
-import './globals.css';
-import type { Metadata, Viewport } from 'next';
-import { Manrope } from 'next/font/google';
-import { UserProvider } from '@/lib/auth';
-import { getUser } from '@/lib/db/queries';
+import "./globals.css";
+import type { Metadata, Viewport } from "next";
+import { Manrope } from "next/font/google";
+import { UserProvider } from "@/lib/auth";
+import { getUser } from "@/lib/db/queries";
+import { Analytics } from "@vercel/analytics/react";
+import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
 
 export const metadata: Metadata = {
-  title: 'Next.js SaaS Starter',
-  description: 'Get started quickly with Next.js, Postgres, and Stripe.',
+  title: "BITCOIN-TX",
+  description: "Bitcoin tools",
 };
 
 export const viewport: Viewport = {
   maximumScale: 1,
 };
 
-const manrope = Manrope({ subsets: ['latin'] });
+const manrope = Manrope({ subsets: ["latin"] });
 
 export default function RootLayout({
   children,
@@ -23,12 +26,14 @@ export default function RootLayout({
   let userPromise = getUser();
 
   return (
-    <html
-      lang="en"
-      className={`bg-white dark:bg-gray-950 text-black dark:text-white ${manrope.className}`}
-    >
-      <body className="min-h-[100dvh] bg-gray-50">
-        <UserProvider userPromise={userPromise}>{children}</UserProvider>
+    <html lang="en" className={`  ${manrope.className}`}>
+      <body className="body-custom">
+        <UserProvider userPromise={userPromise}>
+          <Header />
+          {children}
+          <Footer />
+        </UserProvider>
+        <Analytics />
       </body>
     </html>
   );

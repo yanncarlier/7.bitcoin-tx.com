@@ -1,8 +1,8 @@
-'use server';
+"use server";
 
-import { z } from 'zod';
-import { and, eq, sql } from 'drizzle-orm';
-import { db } from '@/lib/db/drizzle';
+import { z } from "zod";
+import { and, eq, sql } from "drizzle-orm";
+import { db } from "@/lib/db/drizzle"; // Database connection/instance
 import {
   User,
   users,
@@ -15,43 +15,60 @@ import {
   type NewActivityLog,
   ActivityType,
   invitations,
-} from '@/lib/db/schema';
-import { comparePasswords, hashPassword, setSession } from '@/lib/auth/session';
-import { redirect } from 'next/navigation';
-import { cookies } from 'next/headers';
-import { createCheckoutSession } from '@/lib/payments/stripe';
-import { getUser, getUserWithTeam } from '@/lib/db/queries';
+} from "@/lib/db/schema"; // Database schema definitions and types
+import { comparePasswords, hashPassword, setSession } from "@/lib/auth/session"; // Authentication utilities
+import { redirect } from "next/navigation"; // Next.js redirect utility
+import { cookies } from "next/headers"; // Cookie handling utility
+import { createCheckoutSession } from "@/lib/payments/stripe"; // Stripe payment integration
+import { getUser, getUserWithTeam } from "@/lib/db/queries"; // Custom database query helpers
 import {
   validatedAction,
   validatedActionWithUser,
-} from '@/lib/auth/middleware';
+} from "@/lib/auth/middleware"; // Authentication middleware wrappers
 
+// Define ActionState type for createStore return value
+type ActionState = {
+  success?: string;
+  error?: string;
+  data?: any;
+};
+
+// Logs user activity/team actions to the database
 async function logActivity(
   teamId: number | null | undefined,
   userId: number,
   type: ActivityType,
-  ipAddress?: string,
+  ipAddress?: string
 ) {
   if (teamId === null || teamId === undefined) {
-    return;
+    return; // Skip if no team ID provided
   }
   const newActivity: NewActivityLog = {
     teamId,
     userId,
     action: type,
-    ipAddress: ipAddress || '',
+    ipAddress: ipAddress || "",
   };
-  await db.insert(activityLogs).values(newActivity);
+  await db.insert(activityLogs).values(newActivity); // Insert activity log entry
 }
 
+// Schema for sign-in form validation
+// const signInSchema = z.object({
+//   email: z.string().email().min(3).max(255),
+//   password: z.string().min(14).max(100),
+// });
+
+// Schema for sign-in form validation
 const signInSchema = z.object({
   email: z.string().email().min(3).max(255),
-  password: z.string().min(8).max(100),
+  password: z.string().max(100),
 });
 
+// Sign-in action handler
 export const signIn = validatedAction(signInSchema, async (data, formData) => {
   const { email, password } = data;
 
+  // Fetch user with team information
   const userWithTeam = await db
     .select({
       user: users,
@@ -63,52 +80,71 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
     .where(eq(users.email, email))
     .limit(1);
 
+  // Check if user exists
   if (userWithTeam.length === 0) {
     return {
-      error: 'Invalid email or password. Please try again.',
+      error: "Invalid email or password. Please try again.",
       email,
       password,
     };
   }
 
+  // Verify password
   const { user: foundUser, team: foundTeam } = userWithTeam[0];
 
   const isPasswordValid = await comparePasswords(
     password,
-    foundUser.passwordHash,
+    foundUser.passwordHash
   );
 
   if (!isPasswordValid) {
     return {
-      error: 'Invalid email or password. Please try again.',
+      error: "Invalid email or password. Please try again.",
       email,
       password,
     };
   }
 
+  // Set session and log sign-in activity
   await Promise.all([
     setSession(foundUser),
     logActivity(foundTeam?.id, foundUser.id, ActivityType.SIGN_IN),
   ]);
 
-  const redirectTo = formData.get('redirect') as string | null;
-  if (redirectTo === 'checkout') {
-    const priceId = formData.get('priceId') as string;
-    return createCheckoutSession({ team: foundTeam, priceId });
+  // Handle redirect based on form data
+  const redirectTo = formData.get("redirect") as string | null;
+  if (redirectTo === "checkout") {
+    const priceId = formData.get("priceId") as string;
+    return createCheckoutSession({ team: foundTeam, priceId }); // Redirect to Stripe checkout
   }
 
-  redirect('/dashboard');
+  redirect("/dashboard"); // Default redirect to dashboard
 });
+
+// Schema for sign-up form validation
+// const signUpSchema = z.object({
+//   email: z.string().email(),
+//   password: z.string().min(14),
+//   inviteId: z.string().optional(),
+// });
 
 const signUpSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(8),
+  password: z
+    .string()
+    .min(14, "Password must be at least 14 characters long")
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).+$/,
+      "Password must include uppercase and lowercase letters, numbers, and special characters"
+    ),
   inviteId: z.string().optional(),
 });
 
+// Sign-up action handler
 export const signUp = validatedAction(signUpSchema, async (data, formData) => {
   const { email, password, inviteId } = data;
 
+  // Check if user already exists
   const existingUser = await db
     .select()
     .from(users)
@@ -117,7 +153,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
 
   if (existingUser.length > 0) {
     return {
-      error: 'Failed to create user. Please try again.',
+      error: "Failed to create user. Please try again.",
       email,
       password,
     };
@@ -125,17 +161,58 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
 
   const passwordHash = await hashPassword(password);
 
+  // Create new user
   const newUser: NewUser = {
     email,
     passwordHash,
-    role: 'owner', // Default role, will be overridden if there's an invitation
+    role: "owner", // Default role, will be overridden if there's an invitation
   };
 
   const [createdUser] = await db.insert(users).values(newUser).returning();
 
   if (!createdUser) {
     return {
-      error: 'Failed to create user. Please try again.',
+      error: "Failed to create user. Please try again.",
+      email,
+      password,
+    };
+  }
+
+  // BTCpay create new user account
+  const myHeaders = new Headers();
+  myHeaders.append("Content-Type", "application/json");
+  myHeaders.append(
+    "Authorization",
+    `token ${process.env.BTCPAY_SERVER_CANMANAGEUSERS}`
+  );
+
+  const raw = JSON.stringify({
+    email: email,
+    password: password,
+    isAdministrator: false, // Default to non-administrator
+  });
+
+  const requestOptionsUser = {
+    method: "POST",
+    headers: myHeaders,
+    body: raw,
+    redirect: "follow" as RequestRedirect,
+  };
+
+  const btcpayUrl = process.env.BTCPAY_API_URL;
+
+  const response = await fetch(btcpayUrl + `/api/v1/users`, requestOptionsUser);
+
+  if (!response.ok) {
+    console.log("Bad response from BTCpay server");
+    throw new Error("Bad response from BTCpay server");
+  }
+
+  const createdBtcpayUser = await response.json();
+
+  if (!createdBtcpayUser) {
+    return {
+      error: "Failed to create BTCpay user. Please try again.",
       email,
       password,
     };
@@ -145,8 +222,8 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
   let userRole: string;
   let createdTeam: typeof teams.$inferSelect | null = null;
 
+  // Handle invitation flow
   if (inviteId) {
-    // Check if there's a valid invitation
     const [invitation] = await db
       .select()
       .from(invitations)
@@ -154,8 +231,8 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
         and(
           eq(invitations.id, parseInt(inviteId)),
           eq(invitations.email, email),
-          eq(invitations.status, 'pending'),
-        ),
+          eq(invitations.status, "pending")
+        )
       )
       .limit(1);
 
@@ -165,7 +242,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
 
       await db
         .update(invitations)
-        .set({ status: 'accepted' })
+        .set({ status: "accepted" })
         .where(eq(invitations.id, invitation.id));
 
       await logActivity(teamId, createdUser.id, ActivityType.ACCEPT_INVITATION);
@@ -176,7 +253,7 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
         .where(eq(teams.id, teamId))
         .limit(1);
     } else {
-      return { error: 'Invalid or expired invitation.', email, password };
+      return { error: "Invalid or expired invitation.", email, password };
     }
   } else {
     // Create a new team if there's no invitation
@@ -188,80 +265,106 @@ export const signUp = validatedAction(signUpSchema, async (data, formData) => {
 
     if (!createdTeam) {
       return {
-        error: 'Failed to create team. Please try again.',
+        error: "Failed to create team. Please try again.",
         email,
         password,
       };
     }
 
     teamId = createdTeam.id;
-    userRole = 'owner';
+    userRole = "owner";
 
     await logActivity(teamId, createdUser.id, ActivityType.CREATE_TEAM);
   }
 
+  // Add user to team
   const newTeamMember: NewTeamMember = {
     userId: createdUser.id,
     teamId: teamId,
     role: userRole,
   };
 
+  // Complete signup process
   await Promise.all([
     db.insert(teamMembers).values(newTeamMember),
     logActivity(teamId, createdUser.id, ActivityType.SIGN_UP),
     setSession(createdUser),
   ]);
 
-  const redirectTo = formData.get('redirect') as string | null;
-  if (redirectTo === 'checkout') {
-    const priceId = formData.get('priceId') as string;
+  // Handle redirect
+  const redirectTo = formData.get("redirect") as string | null;
+  if (redirectTo === "checkout") {
+    const priceId = formData.get("priceId") as string;
     return createCheckoutSession({ team: createdTeam, priceId });
   }
 
-  redirect('/dashboard');
+  redirect("/dashboard");
 });
 
+// Sign-out action handler
 export async function signOut() {
   const user = (await getUser()) as User;
   const userWithTeam = await getUserWithTeam(user.id);
   await logActivity(userWithTeam?.teamId, user.id, ActivityType.SIGN_OUT);
-  (await cookies()).delete('session');
+  (await cookies()).delete("session");
 }
 
+// Schema for password update validation
+// const updatePasswordSchema = z
+//   .object({
+//     currentPassword: z.string().min(8).max(100),
+//     newPassword: z.string().min(8).max(100),
+//     confirmPassword: z.string().min(8).max(100),
+//   })
+//   .refine((data) => data.newPassword === data.confirmPassword, {
+//     message: "Passwords don't match",
+//     path: ["confirmPassword"],
+//   });
+
+// Update Password Schema
 const updatePasswordSchema = z
   .object({
-    currentPassword: z.string().min(8).max(100),
-    newPassword: z.string().min(8).max(100),
-    confirmPassword: z.string().min(8).max(100),
+    currentPassword: z.string().max(100),
+    newPassword: z
+      .string()
+      .min(14, "Password must be at least 14 characters long")
+      .regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).+$/,
+        "Password must include uppercase and lowercase letters, numbers, and special characters"
+      ),
+    confirmPassword: z.string().max(100),
   })
   .refine((data) => data.newPassword === data.confirmPassword, {
     message: "Passwords don't match",
-    path: ['confirmPassword'],
+    path: ["confirmPassword"],
   });
 
+// Password update action handler
 export const updatePassword = validatedActionWithUser(
   updatePasswordSchema,
   async (data, _, user) => {
     const { currentPassword, newPassword } = data;
 
+    // Verify current password
     const isPasswordValid = await comparePasswords(
       currentPassword,
-      user.passwordHash,
+      user.passwordHash
     );
 
     if (!isPasswordValid) {
-      return { error: 'Current password is incorrect.' };
+      return { error: "Current password is incorrect." };
     }
 
     if (currentPassword === newPassword) {
       return {
-        error: 'New password must be different from the current password.',
+        error: "New password must be different from the current password.",
       };
     }
 
     const newPasswordHash = await hashPassword(newPassword);
     const userWithTeam = await getUserWithTeam(user.id);
 
+    // Update password and log activity
     await Promise.all([
       db
         .update(users)
@@ -270,22 +373,30 @@ export const updatePassword = validatedActionWithUser(
       logActivity(userWithTeam?.teamId, user.id, ActivityType.UPDATE_PASSWORD),
     ]);
 
-    return { success: 'Password updated successfully.' };
-  },
+    return { success: "Password updated successfully." };
+  }
 );
 
+// Schema for account deletion validation
+// const deleteAccountSchema = z.object({
+//   password: z.string().min(8).max(100),
+// });
+
+// Schema for account deletion validation
 const deleteAccountSchema = z.object({
-  password: z.string().min(8).max(100),
+  password: z.string().max(100),
 });
 
+// Account deletion action handler
 export const deleteAccount = validatedActionWithUser(
   deleteAccountSchema,
   async (data, _, user) => {
     const { password } = data;
 
+    // Verify password
     const isPasswordValid = await comparePasswords(password, user.passwordHash);
     if (!isPasswordValid) {
-      return { error: 'Incorrect password. Account deletion failed.' };
+      return { error: "Incorrect password. Account deletion failed." };
     }
 
     const userWithTeam = await getUserWithTeam(user.id);
@@ -293,10 +404,10 @@ export const deleteAccount = validatedActionWithUser(
     await logActivity(
       userWithTeam?.teamId,
       user.id,
-      ActivityType.DELETE_ACCOUNT,
+      ActivityType.DELETE_ACCOUNT
     );
 
-    // Soft delete
+    // Perform soft delete by marking account as deleted
     await db
       .update(users)
       .set({
@@ -305,46 +416,52 @@ export const deleteAccount = validatedActionWithUser(
       })
       .where(eq(users.id, user.id));
 
+    // Remove team membership if exists
     if (userWithTeam?.teamId) {
       await db
         .delete(teamMembers)
         .where(
           and(
             eq(teamMembers.userId, user.id),
-            eq(teamMembers.teamId, userWithTeam.teamId),
-          ),
+            eq(teamMembers.teamId, userWithTeam.teamId)
+          )
         );
     }
 
-    (await cookies()).delete('session');
-    redirect('/sign-in');
-  },
+    (await cookies()).delete("session"); // Clear session
+    redirect("/sign-in");
+  }
 );
 
+// Schema for account update validation
 const updateAccountSchema = z.object({
-  name: z.string().min(1, 'Name is required').max(100),
-  email: z.string().email('Invalid email address'),
+  name: z.string().min(1, "Name is required").max(100),
+  email: z.string().email("Invalid email address"),
 });
 
+// Account update action handler
 export const updateAccount = validatedActionWithUser(
   updateAccountSchema,
   async (data, _, user) => {
     const { name, email } = data;
     const userWithTeam = await getUserWithTeam(user.id);
 
+    // Update account details and log activity
     await Promise.all([
       db.update(users).set({ name, email }).where(eq(users.id, user.id)),
       logActivity(userWithTeam?.teamId, user.id, ActivityType.UPDATE_ACCOUNT),
     ]);
 
-    return { success: 'Account updated successfully.' };
-  },
+    return { success: "Account updated successfully." };
+  }
 );
 
+// Schema for team member removal validation
 const removeTeamMemberSchema = z.object({
   memberId: z.number(),
 });
 
+// Team member removal action handler
 export const removeTeamMember = validatedActionWithUser(
   removeTeamMemberSchema,
   async (data, _, user) => {
@@ -352,33 +469,36 @@ export const removeTeamMember = validatedActionWithUser(
     const userWithTeam = await getUserWithTeam(user.id);
 
     if (!userWithTeam?.teamId) {
-      return { error: 'User is not part of a team' };
+      return { error: "User is not part of a team" };
     }
 
+    // Remove team member and log activity
     await db
       .delete(teamMembers)
       .where(
         and(
           eq(teamMembers.id, memberId),
-          eq(teamMembers.teamId, userWithTeam.teamId),
-        ),
+          eq(teamMembers.teamId, userWithTeam.teamId)
+        )
       );
 
     await logActivity(
       userWithTeam.teamId,
       user.id,
-      ActivityType.REMOVE_TEAM_MEMBER,
+      ActivityType.REMOVE_TEAM_MEMBER
     );
 
-    return { success: 'Team member removed successfully' };
-  },
+    return { success: "Team member removed successfully" };
+  }
 );
 
+// Schema for team member invitation validation
 const inviteTeamMemberSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  role: z.enum(['member', 'owner']),
+  email: z.string().email("Invalid email address"),
+  role: z.enum(["member", "owner"]),
 });
 
+// Team member invitation action handler
 export const inviteTeamMember = validatedActionWithUser(
   inviteTeamMemberSchema,
   async (data, _, user) => {
@@ -386,26 +506,24 @@ export const inviteTeamMember = validatedActionWithUser(
     const userWithTeam = await getUserWithTeam(user.id);
 
     if (!userWithTeam?.teamId) {
-      return { error: 'User is not part of a team' };
+      return { error: "User is not part of a team" };
     }
 
+    // Check if user is already a team member
     const existingMember = await db
       .select()
       .from(users)
       .leftJoin(teamMembers, eq(users.id, teamMembers.userId))
       .where(
-        and(
-          eq(users.email, email),
-          eq(teamMembers.teamId, userWithTeam.teamId),
-        ),
+        and(eq(users.email, email), eq(teamMembers.teamId, userWithTeam.teamId))
       )
       .limit(1);
 
     if (existingMember.length > 0) {
-      return { error: 'User is already a member of this team' };
+      return { error: "User is already a member of this team" };
     }
 
-    // Check if there's an existing invitation
+    // Check for existing pending invitation
     const existingInvitation = await db
       .select()
       .from(invitations)
@@ -413,13 +531,13 @@ export const inviteTeamMember = validatedActionWithUser(
         and(
           eq(invitations.email, email),
           eq(invitations.teamId, userWithTeam.teamId),
-          eq(invitations.status, 'pending'),
-        ),
+          eq(invitations.status, "pending")
+        )
       )
       .limit(1);
 
     if (existingInvitation.length > 0) {
-      return { error: 'An invitation has already been sent to this email' };
+      return { error: "An invitation has already been sent to this email" };
     }
 
     // Create a new invitation
@@ -428,18 +546,267 @@ export const inviteTeamMember = validatedActionWithUser(
       email,
       role,
       invitedBy: user.id,
-      status: 'pending',
+      status: "pending",
     });
 
     await logActivity(
       userWithTeam.teamId,
       user.id,
-      ActivityType.INVITE_TEAM_MEMBER,
+      ActivityType.INVITE_TEAM_MEMBER
     );
 
     // TODO: Send invitation email and include ?inviteId={id} to sign-up URL
     // await sendInvitationEmail(email, userWithTeam.team.name, role)
 
-    return { success: 'Invitation sent successfully' };
-  },
+    return { success: "Invitation sent successfully" };
+  }
 );
+
+//  ################### generate Mnemonic #########################
+export const generateMnemonic = async (): Promise<ActionState> => {
+  const apiAddresses = process.env.BE_API_ADDRESSES; // Base URL for the API
+  if (!apiAddresses) {
+    return { error: "API address not configured." };
+  }
+
+  try {
+    const response = await fetch(`${apiAddresses}/generate-mnemonic`);
+    if (!response.ok) {
+      throw new Error("Failed to generate mnemonic");
+    }
+    const data = await response.json();
+    return {
+      success: "Mnemonic generated successfully.",
+      data: data.BIP39Mnemonic,
+    };
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : "An error occurred",
+    };
+  }
+};
+// ############################
+// BTCPay Create a new store and wallet
+// ############################
+export const createStore = async (
+  state: ActionState,
+  formData: FormData
+): Promise<ActionState> => {
+  // Extract email and password from form data
+  const email = formData.get("email")?.toString();
+  const password = formData.get("password")?.toString();
+  const mnemonic = formData.get("mnemonic") as string | null;
+
+  // Validate that email and password are provided
+  if (!email || !password) {
+    return { error: "Email and password are required." };
+  }
+
+  // Retrieve the current authenticated user
+  const user = await getUser();
+  if (!user) {
+    return { error: "User not authenticated." };
+  }
+
+  // Check if the form email matches the user's account email
+  if (email !== user.email) {
+    return { error: "The provided email does not match your account email." };
+  }
+
+  // Proceed with store and wallet creation
+  const authString = `${email}:${password}`;
+  const encodedAuthString = btoa(authString); // Base64 encoding for Basic Auth
+
+  const btcpayUrl = process.env.BTCPAY_API_URL;
+  const headers = new Headers();
+  headers.set("Content-Type", "application/json");
+  headers.set("Authorization", `Basic ${encodedAuthString}`);
+
+  // Store creation payload
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  //  const storeName = `store-${year}-${month}-${day}`;
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+  // const storeName = `store-${year}-${month}-${day}-${hours}-${minutes}`;
+  const seconds = String(date.getSeconds()).padStart(2, "0");
+  const storeName = `store-${year}-${month}-${day}-${hours}-${minutes}-${seconds}`;
+
+  // https://btcpay.bitcoin-tx.com/docs#operation/Stores_CreateStore
+  const storePayload = JSON.stringify({
+    name: storeName,
+    website: btcpayUrl,
+    networkFeeMode: "MultiplePaymentsOnly",
+  });
+
+  const storeRequestOptions = {
+    method: "POST",
+    headers: headers,
+    body: storePayload,
+    redirect: "follow" as RequestRedirect,
+  };
+
+  try {
+    const storeResponse = await fetch(
+      `${btcpayUrl}/api/v1/stores`,
+      storeRequestOptions
+    );
+
+    if (!storeResponse.ok) {
+      return { error: "Store creation failed on server." };
+    }
+
+    const storeData = await storeResponse.json();
+    const storeId = storeData.id; // Extract store ID from the response
+
+    // Initialize tracking arrays and data object
+    const createdItems: string[] = ["Store"];
+    const failedItems: string[] = [];
+    const data: any = { store: storeData };
+
+    // Step 2: Prepare wallet creation payload (used for both wallets)
+    // https://btcpay.bitcoin-tx.com/docs#operation/StoreOnChainPaymentMethods_GenerateOnChainWallet
+    //
+    // const walletPayload = JSON.stringify({
+    //   existingMnemonic: mnemonic || null,
+    //   passphrase: "",
+    //   accountNumber: 0,
+    //   savePrivateKeys: false,
+    //   importKeysToRPC: false,
+    //   wordList: "English",
+    //   wordCount: 12,
+    //   scriptPubKeyType: "Segwit",
+    // });
+
+    let walletPayload;
+    if (mnemonic) {
+      walletPayload = JSON.stringify({
+        existingMnemonic: mnemonic,
+        passphrase: "",
+        accountNumber: 0,
+        savePrivateKeys: false,
+        importKeysToRPC: false,
+        wordList: "English",
+        wordCount: 12,
+        scriptPubKeyType: "Segwit",
+      });
+    } else {
+      walletPayload = JSON.stringify({
+        existingMnemonic: null,
+        passphrase: "",
+        accountNumber: 0,
+        savePrivateKeys: false,
+        importKeysToRPC: false,
+        wordList: "English",
+        wordCount: 12,
+        scriptPubKeyType: "Segwit",
+      });
+    }
+
+    // Wallet request options (reused for both BTC and LBTC)
+    const walletRequestOptions = {
+      method: "POST",
+      headers: headers,
+      body: walletPayload,
+      redirect: "follow" as RequestRedirect,
+    };
+
+    // Step 3: Create BTC wallet
+    try {
+      const btcWalletUrl = `${btcpayUrl}/api/v1/stores/${storeId}/payment-methods/BTC/wallet/generate`;
+      const btcWalletResponse = await fetch(btcWalletUrl, walletRequestOptions);
+
+      if (btcWalletResponse.ok) {
+        const btcWalletData = await btcWalletResponse.json();
+
+        const storeMnemonic = btcWalletData.mnemonic; // Extract mnemonic from the response
+        // console.log("Store mnemonic:", storeMnemonic);
+
+        createdItems.push("BTC wallet");
+        data.btcWallet = btcWalletData;
+      } else {
+        failedItems.push("BTC wallet");
+      }
+    } catch {
+      failedItems.push("BTC wallet");
+    }
+
+    // Step 4: Create LBTC wallet
+    try {
+      const lbtcWalletUrl = `${btcpayUrl}/api/v1/stores/${storeId}/payment-methods/LBTC/wallet/generate`;
+      const lbtcWalletResponse = await fetch(
+        lbtcWalletUrl,
+        walletRequestOptions
+      );
+
+      if (lbtcWalletResponse.ok) {
+        const lbtcWalletData = await lbtcWalletResponse.json();
+        createdItems.push("LBTC wallet");
+        data.lbtcWallet = lbtcWalletData;
+      } else {
+        failedItems.push("LBTC wallet");
+      }
+    } catch {
+      failedItems.push("LBTC wallet");
+    }
+
+    // Step x: Create USDt wallet
+    try {
+      const USDtWalletUrl = `${btcpayUrl}/api/v1/stores/${storeId}/payment-methods/USDt/wallet/generate`;
+      const USDtWalletResponse = await fetch(
+        USDtWalletUrl,
+        walletRequestOptions
+      );
+
+      if (USDtWalletResponse.ok) {
+        const USDtWalletData = await USDtWalletResponse.json();
+        createdItems.push("USDt wallet");
+        data.USDtWallet = USDtWalletData;
+      } else {
+        failedItems.push("USDt wallet");
+      }
+    } catch {
+      failedItems.push("USDt wallet");
+    }
+
+    // Step x: Create LCAD wallet
+    try {
+      const LCADWalletUrl = `${btcpayUrl}/api/v1/stores/${storeId}/payment-methods/LCAD/wallet/generate`;
+      const LCADWalletResponse = await fetch(
+        LCADWalletUrl,
+        walletRequestOptions
+      );
+
+      if (LCADWalletResponse.ok) {
+        const LCADWalletData = await LCADWalletResponse.json();
+        createdItems.push("LCAD wallet");
+        data.LCADWallet = LCADWalletData;
+      } else {
+        failedItems.push("LCAD wallet");
+      }
+    } catch {
+      failedItems.push("LCAD wallet");
+    }
+
+    // Step 5: Construct success and error messages
+    const successMessage = `${createdItems.join(", ")} created successfully.`;
+    const errorMessage =
+      failedItems.length > 0
+        ? `${failedItems.join(", ")} creation failed.`
+        : undefined;
+
+    // Step 6: Return the result
+    return {
+      success: successMessage,
+      error: errorMessage,
+      data,
+    };
+  } catch (error) {
+    return {
+      error:
+        "An unexpected error occurred while creating the store or wallets.",
+    };
+  }
+};

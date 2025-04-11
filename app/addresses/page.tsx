@@ -18,6 +18,7 @@ type AddressDetails = {
   address: string;
   public_key: string;
   private_key?: string | null;
+  wif?: string | null;
 };
 
 type AddressListResponse = {
@@ -257,56 +258,6 @@ export default function BitcoinAddressPage() {
           <CardContent className="py-3">
             <form onSubmit={handleGenerateAddresses} className="space-y-4">
               <div>
-                <Label htmlFor="addressType" className="text-sm text-gray-200">
-                  Address Type
-                </Label>
-                <select
-                  id="addressType"
-                  value={addressType}
-                  onChange={(e) => setAddressType(e.target.value)}
-                  className="mt-1 w-full text-sm p-2 border border-gray-300 rounded-md bg-gray-800 text-white"
-                >
-                  <option value="bip32">
-                    BIP32: Hierarchical Deterministic (HD) wallets (e.g.,
-                    "1..."). Wallets: Electrum, Bitcoin Core, MultiBit. Not
-                    recommended (foundational, lacks specificity).
-                  </option>
-                  <option value="bip44">
-                    BIP44: Legacy HD (P2PKH, "1..."). Wallets: Ledger, Trezor,
-                    Electrum, Mycelium, Exodus. Good compatibility, but higher
-                    fees.
-                  </option>
-                  <option value="bip49">
-                    BIP49: Wrapped SegWit (P2SH-P2WPKH, "3..."). Wallets:
-                    Ledger, Trezor, Samourai, BlueWallet, Blockstream Green.
-                    Transitional choice, less efficient than native SegWit.
-                  </option>
-                  <option value="bip84">
-                    BIP84: Native SegWit (P2WPKH, "bc1..."). Wallets: Ledger,
-                    Trezor, Samourai, BlueWallet, Blockstream Green, Electrum.
-                    Recommended Default: Best balance of fees, support, and
-                    modernity.
-                  </option>
-                  <option value="bip86">
-                    BIP86: Taproot (P2TR, "bc1p..."). Wallets: Ledger, Trezor
-                    Model T, Bitcoin Core, Sparrow, BlueWallet. Offers superior
-                    privacy and scripting potential. Future-proof, but adoption
-                    still growing.
-                  </option>
-                  <option value="bip141-wrapped">
-                    BIP141 Wrapped SegWit (via BIP49): Same as BIP49 ("3...").
-                    Wallets: Ledger, Trezor, Samourai, BlueWallet, Blockstream
-                    Green. Solid compatibility, not optimal.
-                  </option>
-                  <option value="bip141-native">
-                    BIP141 Native SegWit (via BIP84): Same as BIP84 ("bc1...").
-                    Wallets: Ledger, Trezor, Samourai, BlueWallet, Blockstream
-                    Green, Electrum. Recommended Default: Efficient and widely
-                    adopted.
-                  </option>
-                </select>
-              </div>
-              <div>
                 <Label htmlFor="mnemonic" className="text-sm text-gray-200">
                   Mnemonic
                 </Label>
@@ -346,6 +297,57 @@ export default function BitcoinAddressPage() {
                   className="mt-1 w-full text-sm p-2 border border-gray-300 rounded-md bg-gray-800 text-white"
                   placeholder="Enter passphrase"
                 />
+              </div>
+              <div>
+                <Label htmlFor="addressType" className="text-sm text-gray-200">
+                  Address Type
+                </Label>
+                <select
+                  id="addressType"
+                  value={addressType}
+                  onChange={(e) => setAddressType(e.target.value)}
+                  className="mt-1 w-full text-sm p-2 border border-gray-300 rounded-md bg-gray-800 text-white"
+                >
+                  <option value="bip32">
+                    BIP32: Hierarchical Deterministic (HD) wallets (e.g.,
+                    "1..."). Wallets: Electrum, Bitcoin Core, MultiBit. Not
+                    recommended (foundational, lacks specificity).
+                  </option>
+                  <option value="bip44">
+                    BIP44: Legacy HD (P2PKH, "1..."). Wallets: Ledger, Trezor,
+                    Electrum, Mycelium, Exodus. Good compatibility, but higher
+                    fees.
+                  </option>
+                  <option value="bip49">
+                    BIP49: Wrapped SegWit (P2SH-P2WPKH, "3..."). Wallets:
+                    Ledger, Trezor, Samourai, BlueWallet, Blockstream Green.
+                    Transitional choice, less efficient than native SegWit.
+                  </option>
+                  <option value="bip84">
+                    BIP84: Native SegWit (P2WPKH, "bc1..."). Wallets: Ledger,
+                    Trezor, Samourai, BlueWallet, Blockstream Green, Electrum.
+                    Recommended Default: Best balance of fees, support, and
+                    modernity.
+                  </option>
+                  <option value="bip86">
+                    BIP86: Taproot (P2TR, "bc1p..."). Wallets: Ledger, Trezor
+                    Model T, Bitcoin Core, Sparrow, BlueWallet. Offers superior
+                    privacy and scripting potential. Future-proof, but adoption
+                    still growing.
+                  </option>
+                  {/* <option value="bip141-wrapped">
+                    BIP141 Wrapped SegWit (via BIP49): Same as BIP49 ("3...").
+                    Wallets: Ledger, Trezor, Samourai, BlueWallet, Blockstream
+                    Green. Solid compatibility, not optimal.
+                  </option>
+                  <option value="bip141-native">
+                    BIP141 Native SegWit (via BIP84): Same as BIP84 ("bc1...").
+                    Wallets: Ledger, Trezor, Samourai, BlueWallet, Blockstream
+                    Green, Electrum. Recommended Default: Efficient and widely
+                    adopted.
+                  </option>
+                */}
+                </select>
               </div>
               <div>
                 <Label htmlFor="numAddresses" className="text-sm text-gray-200">
@@ -497,6 +499,32 @@ export default function BitcoinAddressPage() {
                           </div>
                         </div>
                       )}
+                      {/* wif (if available) */}
+                      {addr.wif && (
+                        <div className="flex items-center justify-between text-red-500">
+                          <span>
+                            <strong>WIF:</strong> {addr.wif} (Keep this secret!)
+                          </span>
+                          <div className="flex space-x-2">
+                            <Button
+                              onClick={() => handleCopy(addr.wif ?? null)}
+                              className="p-1 bg-gray-700 hover:bg-gray-600"
+                            >
+                              <Copy className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              onClick={() => {
+                                if (addr.wif != null) {
+                                  showQr(addr.wif); // TypeScript knows wif is a string here
+                                }
+                              }}
+                              className="p-1 bg-gray-700 hover:bg-gray-600"
+                            >
+                              QR
+                            </Button>
+                          </div>
+                        </div>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -517,14 +545,14 @@ export default function BitcoinAddressPage() {
           </CardHeader>
           <CardContent className="py-3">
             <ul className="space-y-4 text-sm">
-              <li>
+              {/* <li>
                 <strong>BIP32:</strong> Hierarchical Deterministic (HD) wallets
                 (e.g., "1...").
                 <br />
                 Wallets: Electrum, Bitcoin Core, MultiBit.
                 <br />
                 Not recommended (foundational, lacks specificity).
-              </li>
+              </li> */}
               <li>
                 <strong>BIP44:</strong> Legacy HD (P2PKH, "1...").
                 <br />
@@ -557,7 +585,7 @@ export default function BitcoinAddressPage() {
                 <br />
                 Future-proof, but adoption still growing.
               </li>
-              <li>
+              {/* <li>
                 <strong>BIP141 Wrapped SegWit (via BIP49):</strong> Same as
                 BIP49 ("3...").
                 <br />
@@ -575,7 +603,7 @@ export default function BitcoinAddressPage() {
                 <br />
                 <strong>Recommended Default:</strong> Efficient and widely
                 adopted.
-              </li>
+              </li> */}
             </ul>
             <p className="mt-4 text-xs font-semibold">
               Overall Default: BIP84 (Native SegWit) for its efficiency and

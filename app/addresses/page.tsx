@@ -300,7 +300,11 @@ export default function BitcoinAddressPage() {
               </div>
               <div>
                 <Label htmlFor="addressType" className="text-sm text-gray-200">
-                  Address Type
+                  Address Type{" "}
+                  <p className="text-xs text-gray-500">
+                    Default: BIP84 (Native SegWit) for its efficiency and broad
+                    support in 2025.
+                  </p>
                 </Label>
                 <select
                   id="addressType"
@@ -606,10 +610,6 @@ export default function BitcoinAddressPage() {
                 adopted.
               </li> */}
             </ul>
-            <p className="mt-4 text-xs font-semibold">
-              Overall Default: BIP84 (Native SegWit) for its efficiency and
-              broad support in 2025.
-            </p>
           </CardContent>
         </Card>
         {/* QR Code Modal */}

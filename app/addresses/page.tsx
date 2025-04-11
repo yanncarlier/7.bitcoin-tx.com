@@ -503,7 +503,8 @@ export default function BitcoinAddressPage() {
                       {addr.wif && (
                         <div className="flex items-center justify-between text-red-500">
                           <span>
-                            <strong>WIF:</strong> {addr.wif} (Keep this secret!)
+                            <strong>WIF(Wallet Import Format):</strong>{" "}
+                            {addr.wif} (Keep this secret!)
                           </span>
                           <div className="flex space-x-2">
                             <Button

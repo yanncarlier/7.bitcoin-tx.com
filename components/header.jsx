@@ -49,7 +49,7 @@ export function Header() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Docs
+          Screenshots
         </a>
 
         <div className="flex items-center space-x-4">

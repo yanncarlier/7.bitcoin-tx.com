@@ -72,16 +72,17 @@ export function Settings({ teamData }: { teamData: TeamDataWithMembers }) {
       )) || (
         <Card className="mb-8 w-full bg-gray-800 border border-gray-700 shadow-lg rounded-lg p-6 md:max-w-md lg:max-w-lg xl:max-w-xl">
           <CardHeader>
-            <CardTitle className="text-2xl font-bold text-orange-500">
-              Subscription Required
+            <CardTitle className="text-2xl font-bold text-white">
+              To create stores and wallets, you need an active subscription or a
+              7-day trial. Please upgrade your plan to continue.
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          {/* <CardContent>
             <p className="text-sm text-gray-200">
-              You need an active or trialing subscription to create a store and
-              wallets. Please upgrade your plan to proceed.
+              You need an active or trial subscription (7 days) to create a
+              store and wallets. Please upgrade your plan to proceed.
             </p>
-          </CardContent>
+          </CardContent> */}
         </Card>
       )}
     </section>

@@ -74,7 +74,7 @@ export function Settings({ teamData }: { teamData: TeamDataWithMembers }) {
           <CardHeader>
             <CardTitle className="text-2xl font-bold text-white">
               To create stores and wallets, you need an active subscription or a
-              7-day trial. Please upgrade your plan to continue.
+              14-day trial. Please upgrade your plan to continue.
             </CardTitle>
           </CardHeader>
           {/* <CardContent>

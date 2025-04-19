@@ -43,6 +43,15 @@ export function Header() {
           Pricing
         </Link>
 
+        <a
+          href="https://www.bitcoin-tx.com/Screenshots/docs.html"
+          className="ml-2 text-xl font-semibold text-white"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Docs
+        </a>
+
         <div className="flex items-center space-x-4">
           {user ? (
             <>

@@ -39,8 +39,7 @@ next-env.d.ts
 # Docker
 postgres_data/
 .env*.local
-.env.prod
-.env.dev
+.env.*
 *.tsx.txt
 *.ts.txt
 *.txt

@@ -11,7 +11,16 @@ export function Footer() {
             <h3 className="text-lg font-semibold mb-4 text-white">
               Bitcoin-tx
             </h3>
-            <p className="text-gray-200">Bitcoin tools for teams worldwide.</p>
+
+            <a
+              href="https://www.bitcoin-tx.com/Screenshots/index.html"
+              className="text-gray-200"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {" "}
+              POS SaaS for Stores Screenshots.
+            </a>
           </div>
           <div>
             <h4 className="text-lg font-semibold mb-4 text-white">

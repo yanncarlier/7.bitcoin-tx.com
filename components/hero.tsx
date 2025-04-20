@@ -88,7 +88,7 @@ export default function Hero() {
             </CardHeader>
             <CardContent className="text-center sm:mt-5 sm:text-2xl lg:text-xl xl:text-2xl">
               Accept crypto payments securely with Bitcoin-tx. Choose a plan and
-              try it free for 14 days!
+              try it free for 7 days!
             </CardContent>
           </Card>
         </div>

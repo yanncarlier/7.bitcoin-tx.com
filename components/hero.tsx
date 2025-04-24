@@ -40,18 +40,25 @@ export default function Hero() {
               </CardTitle>
             </CardHeader>
             <CardContent className="text-center sm:mt-5 sm:text-2xl lg:text-xl xl:text-2xl">
-              No Fees: 0% transaction fees with flexible subscription plans.
+              Fees: 0% transaction fees on subscription plans. Store owners can
+              charge fees on store transactions. <br />
+              Security: Create stores using online private keys for convenient
+              management or offline keys for complete control.
               <br />
-              Supported Cryptocurrencies: Bitcoin (BTC), Liquid Tether (USDT),
-              Liquid CAD (L-CAD), Liquid Bitcoin (L-BTC), and Lightning (BTC).
+              Supported Cryptocurrencies: <br />
+              Bitcoin (BTC), <br />
+              Liquid Tether (USDT),
+              <br />
+              Liquid CAD (L-CAD), <br />
+              Liquid Bitcoin (L-BTC), and <br />
+              Lightning (BTC).
               <br /> Invoicing & Accounting: Easy billing and payment tracking.
               <br /> Wallet Management: Securely manage hot and hardware
-              wallets. Payment
-              <br /> Tools: Create invoices, payment requests, pull payments,
-              payouts, and reports. <br />
+              wallets. <br /> Payment Tools: Create invoices, payment requests,
+              pull payments, payouts, and reports. <br />
               Plugins: Integrate with Shopify, POS systems, pay buttons,
               crowdfunding campaigns and more. <br />
-              Open-Source: Transparent and customizable technology.
+              Filosophy: Transparent and customizable technology.
             </CardContent>
           </Card>
         </div>

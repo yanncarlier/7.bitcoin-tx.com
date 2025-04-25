@@ -44,7 +44,7 @@ export function Header() {
         </Link>
 
         <a
-          href="https://www.bitcoin-tx.com/Screenshots/index.html"
+          href="/Screenshots/index.html"
           className="ml-2 text-xl font-semibold text-white"
           target="_blank"
           rel="noopener noreferrer"

@@ -81,7 +81,7 @@ export default function StoreSettings() {
   return (
     <section>
       <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-white">
-        Store Settings
+      Create a new store
       </h1>
 
       {/* Generate Mnemonic Section */}
@@ -151,15 +151,14 @@ export default function StoreSettings() {
       <Card className="mb-8 w-full bg-gray-800 border border-gray-700 shadow-lg rounded-lg p-6 md:max-w-md lg:max-w-lg xl:max-w-xl">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-orange-500">
-            Create a Store & Wallets
+            {/* Create a new store and wallets */}
           </CardTitle>
           <p>
             Use the same credentials to create a new store with hot wallets for
             BTC, LBTC, USDt, and LCAD.
           </p>
           <p className="text-xs text-gray-500">
-            We are not liable for losses. Hot wallets have security risks. Use
-            this feature at your own risk.
+          We are not responsible for any losses. Hot wallets carry security risks if not properly managed. Use this feature at your own risk.
             {/* If you disclose the information
             produced on this page to others, they could take your assets. */}
           </p>

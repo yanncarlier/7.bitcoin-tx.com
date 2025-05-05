@@ -85,14 +85,13 @@ export default function StoreSettings() {
       </h1>
 
       {/* Generate Mnemonic Section */}
-      <Card className="mb-8 w-full bg-gray-800 border border-gray-700 shadow-lg rounded-lg p-6 md:max-w-md lg:max-w-lg xl:max-w-xl">
+      {/* <Card className="mb-8 w-full bg-gray-800 border border-gray-700 shadow-lg rounded-lg p-6 md:max-w-md lg:max-w-lg xl:max-w-xl">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-orange-500">
             Generate Mnemonic for Wallet (Optional)
           </CardTitle>
           <p className="text-xs text-gray-200">
-            {/* Generate a new BIP39 mnemonic phrase to use for your store's
-            wallets.  */}
+            
             If you don’t generate here a mnemonic for your wallet, the system
             will automatically generate one when you create a store and wallet
             below. Use this feature at your own risk.
@@ -146,7 +145,7 @@ export default function StoreSettings() {
             <p className="text-red-500 text-xs mt-3">{generateError}</p>
           )}
         </CardContent>
-      </Card>
+      </Card> */}
 
       {/* Create Store Form */}
       <Card className="mb-8 w-full bg-gray-800 border border-gray-700 shadow-lg rounded-lg p-6 md:max-w-md lg:max-w-lg xl:max-w-xl">

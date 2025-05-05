@@ -11,35 +11,72 @@ export function Footer() {
             <h3 className="text-lg font-semibold mb-4 text-white">
               Bitcoin-tx
             </h3>
-
-            <a
-              href="https://www.bitcoin-tx.com/Screenshots/index.html"
-              className="text-gray-200"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {" "}
-              POS SaaS for Stores Screenshots.
-            </a>
-          </div>
-          <div>
-            <h4 className="text-lg font-semibold mb-4 text-white">
-              Quick Links
-            </h4>
             <ul className="space-y-2">
-              <li>
+            <li>
                 <Link href="/" className="text-gray-200 hover:text-white">
                   Home
                 </Link>
               </li>
-              <li>
+<li>
+          <Link
+          href="/addresses"
+          className="text-gray-200 hover:text-white"
+        >
+          Addresses
+        </Link>
+        </li>
+        <li>
                 <Link
                   href="/pricing"
                   className="text-gray-200 hover:text-white"
                 >
                   Pricing
                 </Link>
-              </li>
+                </li>
+          </ul>
+          </div>
+          
+          <div>
+            <h4 className="text-lg font-semibold mb-4 text-white">
+              Quick Links
+            </h4>
+            <ul className="space-y-2">
+            <li>
+            <a
+              href="/Screenshots/index.html"
+              className="text-gray-200"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {" "}
+              Screenshots
+            </a>
+          </li>
+
+                <li>
+
+
+
+
+        <Link href="/charts" className="text-gray-200 hover:text-white">
+          Charts
+        </Link> 
+        </li>
+        <li>
+   
+        </li>
+ 
+  
+        
+
+
+
+
+
+
+
+
+
               {/* <li>
                 <Link href="#" className="text-gray-200 hover:text-white">
                   About Us

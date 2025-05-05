@@ -26,23 +26,25 @@ export function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
         <Link href="/" className="flex items-center">
           <CircleIcon className="h-10 w-10 text-orange-500" />
-          <span className="ml-2 text-xl font-semibold text-white">
+          {/* <span className="ml-2 text-xl font-semibold text-white">
             Bitcoin-tx
-          </span>
+          </span> */}
         </Link>
-        <Link href="/charts" className="ml-2 text-xl font-semibold text-white">
+        {/* <Link href="/charts" className="ml-2 text-xl font-semibold text-white">
           Charts
-        </Link>
+        </Link>  */}
+        {/* <div className="ml-2 text-xl font-semibold text-white">|</div>
         <Link
           href="/addresses"
-          className="ml-2 text-xl font-semibold text-white "
+          className="ml-2 text-xl font-semibold text-white"
         >
           Addresses
-        </Link>
+        </Link> */}
+        {/* <div className="ml-2 text-xl font-semibold text-white">|</div>
         <Link href="/pricing" className="ml-2 text-xl font-semibold text-white">
           Pricing
-        </Link>
-
+        </Link> */}
+        {/* <div className="ml-2 text-xl font-semibold text-white">|</div>
         <a
           href="/Screenshots/index.html"
           className="ml-2 text-xl font-semibold text-white"
@@ -50,7 +52,7 @@ export function Header() {
           rel="noopener noreferrer"
         >
           Screenshots
-        </a>
+        </a> */}
 
         <div className="flex items-center space-x-4">
           {user ? (

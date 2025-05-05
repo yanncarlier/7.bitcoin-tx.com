@@ -11,6 +11,7 @@ export function NavigationLinks() {
   };
 
   return (
+    
     <nav className="relative">
       {/* Toggle Button for Mobile */}
       <button
@@ -36,19 +37,20 @@ export function NavigationLinks() {
       </button>
 
       {/* Navigation Links */}
+      
       <div
         className={`${
           isOpen ? "block" : "hidden"
         } md:flex md:items-center md:space-x-4 absolute md:static top-full left-0 w-full md:w-auto bg-gray-800 md:bg-transparent p-4 md:p-0`}
-      >
+      > <div className="ml-2 text-xl font-semibold text-white">|</div>
         <a
           className="ml-2 text-xl font-semibold text-orange-500"
           target="_blank"
           rel="noopener noreferrer"
           href="https://btcpay.bitcoin-tx.com/login?ReturnUrl=%2F"
         >
-          Store Sign In
-        </a>
+          Store
+        </a> <div className="ml-2 text-xl font-semibold text-white">|</div>
         <Link
           href="/dashboard"
           className="ml-2 text-xl font-semibold text-orange-500"

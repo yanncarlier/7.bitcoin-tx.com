@@ -22,7 +22,7 @@ export function Footer() {
           href="/addresses"
           className="text-gray-200 hover:text-white"
         >
-          Addresses
+          Mnemonic and addresses generator
         </Link>
         </li>
         <li>
@@ -48,7 +48,7 @@ export function Footer() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              {" "}
+              
               Screenshots
             </a>
           </li>
@@ -67,16 +67,7 @@ export function Footer() {
         </li>
  
   
-        
-
-
-
-
-
-
-
-
-
+ 
               {/* <li>
                 <Link href="#" className="text-gray-200 hover:text-white">
                   About Us

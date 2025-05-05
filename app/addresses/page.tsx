@@ -149,14 +149,14 @@ export default function BitcoinAddressPage() {
         {/* Header Section */}
         <div className="text-center mb-12">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
-            Address Generator
+          Mnemonic and addresses generator
           </h1>
         </div>
         {/* First Card: Generate Mnemonic */}
         <Card className="mb-8 w-full md:w-4/5 md:mx-auto bg-gray-800 border border-gray-700 shadow-lg rounded-lg p-6">
           <CardHeader>
             <CardTitle className="text-2xl font-bold text-orange-500">
-              Generate New Mnemonic
+            Generate mnemonic
             </CardTitle>
             <p className="text-xs text-gray-500">
               Generate a new BIP39 mnemonic phrase and seed. <br />
@@ -247,7 +247,7 @@ export default function BitcoinAddressPage() {
         <Card className="mb-8 w-full md:w-4/5 md:mx-auto bg-gray-800 border border-gray-700 shadow-lg rounded-lg p-6">
           <CardHeader>
             <CardTitle className="text-2xl font-bold text-orange-500">
-              Generate {displayNames[addressType]} Addresses
+              Generate {displayNames[addressType]} addresses
             </CardTitle>
             <p className="text-xs text-gray-500">
               Generate Bitcoin addresses from a mnemonic using the selected BIP

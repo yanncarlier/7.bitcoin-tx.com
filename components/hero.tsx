@@ -13,12 +13,30 @@ import Price from "@/components/pricing";
 export default function Hero() {
   return (
     <main>
+            <section className="">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+          <Card className="py-4">
+            <CardHeader className="text-center text-1xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl">
+              <CardTitle className="text-2xl font-bold text-orange-500">
+                Get Started
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-center sm:mt-5 sm:text-2xl lg:text-xl xl:text-2xl">
+            Accept crypto payments securely and in compliance.<br />Try it free for 7 days!
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+      <section>
+        <Price />
+      </section>
+
       <section className="">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
           <Card className="py-4">
             <CardHeader className="text-center text-1xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl">
               <CardTitle className="text-2xl font-bold text-orange-500">
-                Bitcoin-tx: Simplified POS SaaS for Stores{" "}
+                Simplified POS SaaS for Stores{" "}
                 <span className="text-orange-500">(Beta)</span>
               </CardTitle>
             </CardHeader>
@@ -82,24 +100,7 @@ export default function Hero() {
           </Card>
         </div>
       </section>
-      <section>
-        <Price />
-      </section>
-      <section className="">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
-          <Card className="py-4">
-            <CardHeader className="text-center text-1xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl">
-              <CardTitle className="text-2xl font-bold text-orange-500">
-                Get Started
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-center sm:mt-5 sm:text-2xl lg:text-xl xl:text-2xl">
-              Accept crypto payments securely with Bitcoin-tx. Choose a plan and
-              try it free for 7 days!
-            </CardContent>
-          </Card>
-        </div>
-      </section>
+ 
     </main>
   );
 }

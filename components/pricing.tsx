@@ -47,7 +47,7 @@ export default async function Pricing() {
             interval={basePrice?.interval || "month"}
             trialDays={basePrice?.trialPeriodDays || 7}
             features={[
-              "1 Store",
+              "1 (Hot wallet) Store ",
               "Email Support",
               "1 Bitcoin Wallet (BTC)",
               "1 Liquid Tether Wallet (USDT)",
@@ -63,16 +63,17 @@ export default async function Pricing() {
             interval={plusPrice?.interval || "month"}
             trialDays={plusPrice?.trialPeriodDays || 7}
             features={[
-              "Managed service",
-              "Hard wallet management (optional)",
+              "1 (Hot wallet) Store",
+              "1 (Hard wallet) Store",
+              "(Hard wallet) Managed service (optional)",
               "Priority Support",
-              "1 Store",
-              "1 Bitcoin Wallet (BTC)",
-              "1 Liquid Tether Wallet (USDT)",
-              "1 Liquid CAD Wallet (L-CAD)",
-              "1 Liquid Bitcoin Wallet (L-BTC)",
-              "1 Lightning Wallet Integration (BTC Lightning)",
-              "1 Point of Sales",
+              "2 Store",
+              "2 Bitcoin Wallet (BTC)",
+              "2 Liquid Tether Wallet (USDT)",
+              "2 Liquid CAD Wallet (L-CAD)",
+              "2 Liquid Bitcoin Wallet (L-BTC)",
+              "2 Lightning Wallet Integration (BTC Lightning)",
+              "2 Point of Sales",
             ]}
             priceId={plusPrice?.id}
           />

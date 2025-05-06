@@ -47,13 +47,13 @@ export default async function Pricing() {
             interval={basePrice?.interval || "month"}
             trialDays={basePrice?.trialPeriodDays || 7}
             features={[
-              "2 Stores",
-              "2 Bitcoin Wallets (BTC)",
-              "2 Liquid Tether Wallets (USDT)",
-              "2 Liquid CAD Wallets (L-CAD)",
-              "2 Liquid Bitcoin Wallets (L-BTC)",
-              "2 Lightning Wallet Integrations (BTC)",
+              "1 Store",
               "Email Support",
+              "1 Bitcoin Wallet (BTC)",
+              "1 Liquid Tether Wallet (USDT)",
+              "1 Liquid CAD Wallet (L-CAD)",
+              "1 Liquid Bitcoin Wallet (L-BTC)",
+              "1 Lightning Wallet Integration (BTC)",
             ]}
             priceId={basePrice?.id}
           />
@@ -63,14 +63,16 @@ export default async function Pricing() {
             interval={plusPrice?.interval || "month"}
             trialDays={plusPrice?.trialPeriodDays || 7}
             features={[
-              "5 Stores",
-              "5 Bitcoin Wallets (BTC)",
-              "5 Liquid Tether Wallets (USDT)",
-              "5 Liquid CAD Wallets (L-CAD)",
-              "5 Liquid Bitcoin Wallets (L-BTC)",
-              "5 Lightning Wallet Integrations (BTC Lightning)",
-              "5 Point of Sales",
+              "Managed service",
+              "Hard wallet management (optional)",
               "Priority Support",
+              "1 Store",
+              "1 Bitcoin Wallet (BTC)",
+              "1 Liquid Tether Wallet (USDT)",
+              "1 Liquid CAD Wallet (L-CAD)",
+              "1 Liquid Bitcoin Wallet (L-BTC)",
+              "1 Lightning Wallet Integration (BTC Lightning)",
+              "1 Point of Sales",
             ]}
             priceId={plusPrice?.id}
           />

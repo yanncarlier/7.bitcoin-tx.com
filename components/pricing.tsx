@@ -64,8 +64,7 @@ export default async function Pricing() {
             trialDays={plusPrice?.trialPeriodDays || 7}
             features={[
               "1 (Hot wallet) Store",
-              "1 (Hard wallet) Store",
-              "(Hard wallet) Managed service (optional)",
+              "1 (Hard wallet) Store (optional service management, extra fee)",
               "Priority Support",
               "2 Store",
               "2 Bitcoin Wallet (BTC)",

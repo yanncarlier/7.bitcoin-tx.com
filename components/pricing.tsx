@@ -72,8 +72,8 @@ export default async function Pricing() {
               "2 Liquid Tether Wallet (USDT)",
               "2 Liquid CAD Wallet (L-CAD)",
               "2 Liquid Bitcoin Wallet (L-BTC)",
-              "2 Lightning Wallet Integration (BTC Lightning)",
-              "2 Point of Sales",
+              "1 Lightning Wallet Integration (BTC Lightning)",
+              "1 Point of Sales",
             ]}
             priceId={plusPrice?.id}
           />

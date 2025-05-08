@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Loader2, Copy } from "lucide-react";
 import { QRCodeCanvas } from "qrcode.react";
 
-// Type definitions remain unchanged
+// Type definitions
 type MnemonicResponse = {
   BIP39Mnemonic: string;
   BIP39Seed: string;
@@ -21,12 +21,13 @@ type AddressDetails = {
   wif?: string | null;
 };
 
-type AddressListResponse = {
+type Bip32AddressListResponse = {
+  bip32_xpub: string;
   addresses: AddressDetails[];
 };
 
 export default function BitcoinAddressPage() {
-  // Existing state declarations
+  // State declarations
   const [newMnemonic, setNewMnemonic] = useState<string | null>(null);
   const [newSeed, setNewSeed] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -36,28 +37,25 @@ export default function BitcoinAddressPage() {
   const [addressMnemonic, setAddressMnemonic] = useState<string>("");
   const [addressPassphrase, setAddressPassphrase] = useState<string>("");
   const [addressNumAddresses, setAddressNumAddresses] = useState<number>(1);
-  const [addressIncludePrivateKeys, setAddressIncludePrivateKeys] =
-    useState<boolean>(false);
-  const [generatedAddresses, setGeneratedAddresses] = useState<
-    AddressDetails[] | null
-  >(null);
+  const [addressDerivationPath, setAddressDerivationPath] = useState<string>("m/0'/{index}");
+  const [addressIncludePrivateKeys, setAddressIncludePrivateKeys] = useState<boolean>(false);
+  const [generatedAddresses, setGeneratedAddresses] = useState<AddressDetails[] | null>(null);
+  const [generatedXpub, setGeneratedXpub] = useState<string | null>(null);
   const [isLoadingAddresses, setIsLoadingAddresses] = useState<boolean>(false);
   const [errorAddresses, setErrorAddresses] = useState<string | null>(null);
 
-  // New state for QR code
+  // QR code state
   const [qrContent, setQrContent] = useState<string | null>(null);
 
-  const apiAddresses = process.env.NEXT_PUBLIC_API_ADDRESSES;
+  const apiAddresses = process.env.NEXT_PUBLIC_API_ADDRESSES || "http://0.0.0.0:8000";
 
-  // Endpoint and display name mappings remain unchanged
+  // Endpoint and display name mappings
   const endpointMap: { [key: string]: string } = {
     bip32: "generate-bip32-addresses",
     bip44: "generate-bip44-addresses",
     bip49: "generate-bip49-addresses",
     bip84: "generate-bip84-addresses",
     bip86: "generate-bip86-addresses",
-    "bip141-wrapped": "generate-bip141-wrapped-segwit-via-bip49",
-    "bip141-native": "generate-bip141-native-segwit-via-bip84",
   };
 
   const displayNames: { [key: string]: string } = {
@@ -66,11 +64,9 @@ export default function BitcoinAddressPage() {
     bip49: "BIP49",
     bip84: "BIP84",
     bip86: "BIP86",
-    "bip141-wrapped": "BIP141 Wrapped SegWit via BIP49",
-    "bip141-native": "BIP141 Native SegWit via BIP84",
   };
 
-  // Existing handlers
+  // Handlers
   const handleGenerateMnemonic = async () => {
     setIsLoading(true);
     setError(null);
@@ -95,18 +91,24 @@ export default function BitcoinAddressPage() {
       setErrorAddresses("Mnemonic is required");
       return;
     }
-    if (addressNumAddresses < 1 || addressNumAddresses > 42) {
-      setErrorAddresses("Number of addresses must be between 1 and 42");
+    if (addressNumAddresses < 1 || addressNumAddresses > 10) {
+      setErrorAddresses("Number of addresses must be between 1 and 10");
+      return;
+    }
+    if (addressType === "bip32" && !addressDerivationPath.includes("{index}")) {
+      setErrorAddresses("Derivation path must include '{index}'");
       return;
     }
     setIsLoadingAddresses(true);
     setErrorAddresses(null);
     setGeneratedAddresses(null);
+    setGeneratedXpub(null);
     const requestBody = {
       mnemonic: addressMnemonic,
       passphrase: addressPassphrase,
       num_addresses: addressNumAddresses,
       include_private_keys: addressIncludePrivateKeys,
+      ...(addressType === "bip32" && { derivation_path: addressDerivationPath }),
     };
     try {
       const endpoint = endpointMap[addressType];
@@ -115,13 +117,15 @@ export default function BitcoinAddressPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requestBody),
       });
-      if (!response.ok) throw new Error("Failed to generate addresses");
-      const data: AddressListResponse = await response.json();
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || "Failed to generate addresses");
+      }
+      const data: Bip32AddressListResponse = await response.json();
+      setGeneratedXpub(data.bip32_xpub);
       setGeneratedAddresses(data.addresses);
     } catch (err) {
-      setErrorAddresses(
-        err instanceof Error ? err.message : "An error occurred"
-      );
+      setErrorAddresses(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setIsLoadingAddresses(false);
     }
@@ -134,7 +138,6 @@ export default function BitcoinAddressPage() {
     }
   };
 
-  // New QR code handlers
   const showQr = (content: string) => {
     setQrContent(content);
   };
@@ -144,19 +147,19 @@ export default function BitcoinAddressPage() {
   };
 
   return (
-    <section className="bg-gray-900 text-white py-12 sm:py-16 lg:py-20">
+    <section className="bg-gray-900 text-White py-12 sm:py-16 lg:py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header Section */}
         <div className="text-center mb-12">
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
-          Mnemonic and addresses generator
+            Mnemonic and Addresses Generator
           </h1>
         </div>
         {/* First Card: Generate Mnemonic */}
         <Card className="mb-8 w-full md:w-4/5 md:mx-auto bg-gray-800 border border-gray-700 shadow-lg rounded-lg p-6">
           <CardHeader>
             <CardTitle className="text-2xl font-bold text-orange-500">
-            Generate mnemonic
+              Generate Mnemonic
             </CardTitle>
             <p className="text-xs text-gray-500">
               Generate a new BIP39 mnemonic phrase and seed. <br />
@@ -247,11 +250,10 @@ export default function BitcoinAddressPage() {
         <Card className="mb-8 w-full md:w-4/5 md:mx-auto bg-gray-800 border border-gray-700 shadow-lg rounded-lg p-6">
           <CardHeader>
             <CardTitle className="text-2xl font-bold text-orange-500">
-              Generate {displayNames[addressType]} addresses
+              Generate {displayNames[addressType]} Addresses
             </CardTitle>
             <p className="text-xs text-gray-500">
-              Generate Bitcoin addresses from a mnemonic using the selected BIP
-              standard. <br />
+              Generate Bitcoin addresses from a mnemonic using the selected BIP standard. <br />
               (Use at your own risk)
             </p>
           </CardHeader>
@@ -298,12 +300,26 @@ export default function BitcoinAddressPage() {
                   placeholder="Enter passphrase"
                 />
               </div>
+              {addressType === "bip32" && (
+                <div>
+                  <Label htmlFor="derivationPath" className="text-sm text-gray-200">
+                    Derivation Path
+                  </Label>
+                  <input
+                    id="derivationPath"
+                    type="text"
+                    value={addressDerivationPath}
+                    onChange={(e) => setAddressDerivationPath(e.target.value)}
+                    className="mt-1 w-full text-sm p-2 border border-gray-300 rounded-md bg-gray-800 text-white"
+                    placeholder="e.g., m/0'/{index}"
+                  />
+                </div>
+              )}
               <div>
                 <Label htmlFor="addressType" className="text-sm text-gray-200">
-                  Address Type{" "}
+                  Address Type
                   <p className="text-xs text-gray-500">
-                    Default: BIP84 (Native SegWit) for its efficiency and broad
-                    support in 2025.
+                    Default: BIP84 (Native SegWit) for its efficiency and broad support in 2025.
                   </p>
                 </Label>
                 <select
@@ -312,45 +328,11 @@ export default function BitcoinAddressPage() {
                   onChange={(e) => setAddressType(e.target.value)}
                   className="mt-1 w-full text-sm p-2 border border-gray-300 rounded-md bg-gray-800 text-white"
                 >
-                  <option value="bip32">
-                    BIP32: Hierarchical Deterministic (HD) wallets (e.g.,
-                    "1..."). Wallets: Electrum, Bitcoin Core, MultiBit. Not
-                    recommended (foundational, lacks specificity).
-                  </option>
-                  <option value="bip44">
-                    BIP44: Legacy HD (P2PKH, "1..."). Wallets: Ledger, Trezor,
-                    Electrum, Mycelium, Exodus. Good compatibility, but higher
-                    fees.
-                  </option>
-                  <option value="bip49">
-                    BIP49: Wrapped SegWit (P2SH-P2WPKH, "3..."). Wallets:
-                    Ledger, Trezor, Samourai, BlueWallet, Blockstream Green.
-                    Transitional choice, less efficient than native SegWit.
-                  </option>
-                  <option value="bip84">
-                    BIP84: Native SegWit (P2WPKH, "bc1..."). Wallets: Ledger,
-                    Trezor, Samourai, BlueWallet, Blockstream Green, Electrum.
-                    Recommended Default: Best balance of fees, support, and
-                    modernity.
-                  </option>
-                  <option value="bip86">
-                    BIP86: Taproot (P2TR, "bc1p..."). Wallets: Ledger, Trezor
-                    Model T, Bitcoin Core, Sparrow, BlueWallet. Offers superior
-                    privacy and scripting potential. Future-proof, but adoption
-                    still growing.
-                  </option>
-                  {/* <option value="bip141-wrapped">
-                    BIP141 Wrapped SegWit (via BIP49): Same as BIP49 ("3...").
-                    Wallets: Ledger, Trezor, Samourai, BlueWallet, Blockstream
-                    Green. Solid compatibility, not optimal.
-                  </option>
-                  <option value="bip141-native">
-                    BIP141 Native SegWit (via BIP84): Same as BIP84 ("bc1...").
-                    Wallets: Ledger, Trezor, Samourai, BlueWallet, Blockstream
-                    Green, Electrum. Recommended Default: Efficient and widely
-                    adopted.
-                  </option>
-                */}
+                  <option value="bip32">BIP32: Custom derivation paths (Legacy)</option>
+                  <option value="bip44">BIP44: Legacy (P2PKH, starts with 1)</option>
+                  <option value="bip49">BIP49: Wrapped SegWit (P2SH-P2WPKH, starts with 3)</option>
+                  <option value="bip84">BIP84: Native SegWit (P2WPKH, starts with bc1)</option>
+                  <option value="bip86">BIP86: Taproot (P2TR, starts with bc1p)</option>
                 </select>
               </div>
               <div>
@@ -363,9 +345,7 @@ export default function BitcoinAddressPage() {
                   min="1"
                   max="10"
                   value={addressNumAddresses}
-                  onChange={(e) =>
-                    setAddressNumAddresses(Number(e.target.value))
-                  }
+                  onChange={(e) => setAddressNumAddresses(Number(e.target.value))}
                   className="mt-1 w-full text-sm p-2 border border-gray-300 rounded-md bg-gray-800 text-white"
                 />
               </div>
@@ -374,15 +354,10 @@ export default function BitcoinAddressPage() {
                   id="includePrivateKeys"
                   type="checkbox"
                   checked={addressIncludePrivateKeys}
-                  onChange={(e) =>
-                    setAddressIncludePrivateKeys(e.target.checked)
-                  }
+                  onChange={(e) => setAddressIncludePrivateKeys(e.target.checked)}
                   className="mr-2"
                 />
-                <Label
-                  htmlFor="includePrivateKeys"
-                  className="text-sm text-gray-200"
-                >
+                <Label htmlFor="includePrivateKeys" className="text-sm text-gray-200">
                   Include Private Keys
                 </Label>
               </div>
@@ -404,135 +379,142 @@ export default function BitcoinAddressPage() {
             {errorAddresses && (
               <p className="text-red-500 text-xs mt-3">{errorAddresses}</p>
             )}
-            {generatedAddresses && (
+            {(generatedAddresses || generatedXpub) && (
               <div className="mt-4">
-                <h3 className="text-sm font-medium text-white">
-                  Generated Addresses
-                </h3>
-                <ul className="mt-2 space-y-2">
-                  {generatedAddresses.map((addr, index) => (
-                    <li key={index} className="text-xs text-gray-200">
-                      {/* Derivation Path */}
-                      <div className="flex items-center justify-between">
-                        <span>
-                          <strong>Derivation Path:</strong>{" "}
-                          {addr.derivation_path}
-                        </span>
-                        <div className="flex space-x-2">
-                          <Button
-                            onClick={() => handleCopy(addr.derivation_path)}
-                            className="p-1 bg-gray-700 hover:bg-gray-600"
-                          >
-                            <Copy className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            onClick={() => showQr(addr.derivation_path)}
-                            className="p-1 bg-gray-700 hover:bg-gray-600"
-                          >
-                            QR
-                          </Button>
-                        </div>
-                      </div>
-                      {/* Address */}
-                      <div className="flex items-center justify-between">
-                        <span>
-                          <strong>Address:</strong> {addr.address}
-                        </span>
-                        <div className="flex space-x-2">
-                          <Button
-                            onClick={() => handleCopy(addr.address)}
-                            className="p-1 bg-gray-700 hover:bg-gray-600"
-                          >
-                            <Copy className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            onClick={() => showQr(addr.address)}
-                            className="p-1 bg-gray-700 hover:bg-gray-600"
-                          >
-                            QR
-                          </Button>
-                        </div>
-                      </div>
-                      {/* Public Key */}
-                      <div className="flex items-center justify-between">
-                        <span>
-                          <strong>Public Key:</strong> {addr.public_key}
-                        </span>
-                        <div className="flex space-x-2">
-                          <Button
-                            onClick={() => handleCopy(addr.public_key)}
-                            className="p-1 bg-gray-700 hover:bg-gray-600"
-                          >
-                            <Copy className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            onClick={() => showQr(addr.public_key)}
-                            className="p-1 bg-gray-700 hover:bg-gray-600"
-                          >
-                            QR
-                          </Button>
-                        </div>
-                      </div>
-
-                      {/* Private Key (if available) */}
-                      {addr.private_key && (
-                        <div className="flex items-center justify-between text-red-500">
+                <h3 className="text-sm font-medium text-white">Generated Addresses</h3>
+                {generatedXpub && (
+                  <div className="flex items-center justify-between text-gray-200 mt-2">
+                    <span>
+                      <strong>Extended Public Key (xpub):</strong> {generatedXpub}
+                    </span>
+                    <div className="flex space-x-2">
+                      <Button
+                        onClick={() => handleCopy(generatedXpub)}
+                        className="p-1 bg-gray-700 hover:bg-gray-600"
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        onClick={() => showQr(generatedXpub)}
+                        className="p-1 bg-gray-700 hover:bg-gray-600"
+                      >
+                        QR
+                      </Button>
+                    </div>
+                  </div>
+                )}
+                {generatedAddresses && (
+                  <ul className="mt-2 space-y-2">
+                    {generatedAddresses.map((addr, index) => (
+                      <li key={index} className="text-xs text-gray-200">
+                        {/* Derivation Path */}
+                        <div className="flex items-center justify-between">
                           <span>
-                            <strong>Private Key:</strong> {addr.private_key}{" "}
-                            (Keep this secret!)
+                            <strong>Derivation Path:</strong> {addr.derivation_path}
                           </span>
                           <div className="flex space-x-2">
                             <Button
-                              onClick={() =>
-                                handleCopy(addr.private_key ?? null)
-                              }
+                              onClick={() => handleCopy(addr.derivation_path)}
                               className="p-1 bg-gray-700 hover:bg-gray-600"
                             >
                               <Copy className="h-4 w-4" />
                             </Button>
                             <Button
-                              onClick={() => {
-                                if (addr.private_key != null) {
-                                  showQr(addr.private_key); // TypeScript knows private_key is a string here
-                                }
-                              }}
+                              onClick={() => showQr(addr.derivation_path)}
                               className="p-1 bg-gray-700 hover:bg-gray-600"
                             >
                               QR
                             </Button>
                           </div>
                         </div>
-                      )}
-                      {/* wif (if available) */}
-                      {addr.wif && (
-                        <div className="flex items-center justify-between text-red-500">
+                        {/* Address */}
+                        <div className="flex items-center justify-between">
                           <span>
-                            <strong>WIF(Wallet Import Format):</strong>{" "}
-                            {addr.wif} (Keep this secret!)
+                            <strong>Address:</strong> {addr.address}
                           </span>
                           <div className="flex space-x-2">
                             <Button
-                              onClick={() => handleCopy(addr.wif ?? null)}
+                              onClick={() => handleCopy(addr.address)}
                               className="p-1 bg-gray-700 hover:bg-gray-600"
                             >
                               <Copy className="h-4 w-4" />
                             </Button>
                             <Button
-                              onClick={() => {
-                                if (addr.wif != null) {
-                                  showQr(addr.wif); // TypeScript knows wif is a string here
-                                }
-                              }}
+                              onClick={() => showQr(addr.address)}
                               className="p-1 bg-gray-700 hover:bg-gray-600"
                             >
                               QR
                             </Button>
                           </div>
                         </div>
-                      )}
-                    </li>
-                  ))}
-                </ul>
+                        {/* Public Key */}
+                        <div className="flex items-center justify-between">
+                          <span>
+                            <strong>Public Key:</strong> {addr.public_key}
+                          </span>
+                          <div className="flex space-x-2">
+                            <Button
+                              onClick={() => handleCopy(addr.public_key)}
+                              className="p-1 bg-gray-700 hover:bg-gray-600"
+                            >
+                              <Copy className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              onClick={() => showQr(addr.public_key)}
+                              className="p-1 bg-gray-700 hover:bg-gray-600"
+                            >
+                              QR
+                            </Button>
+                          </div>
+                        </div>
+                        {/* Private Key (if available) */}
+                        {addr.private_key && (
+                          <div className="flex items-center justify-between text-red-500">
+                            <span>
+                              <strong>Private Key:</strong> {addr.private_key} (Keep this secret!)
+                            </span>
+                            <div className="flex space-x-2">
+                              <Button
+                                onClick={() => handleCopy(addr.private_key ?? null)}
+                                className="p-1 bg-gray-700 hover:bg-gray-600"
+                              >
+                                <Copy className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                onClick={() => addr.private_key && showQr(addr.private_key)}
+                                className="p-1 bg-gray-700 hover:bg-gray-600"
+                              >
+                                QR
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                        {/* WIF (if available) */}
+                        {addr.wif && (
+                          <div className="flex items-center justify-between text-red-500">
+                            <span>
+                              <strong>WIF (Wallet Import Format):</strong> {addr.wif} (Keep this secret!)
+                            </span>
+                            <div className="flex space-x-2">
+                              <Button
+                                onClick={() => handleCopy(addr.wif ?? null)}
+                                className="p-1 bg-gray-700 hover:bg-gray-600"
+                              >
+                                <Copy className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                onClick={() => addr.wif && showQr(addr.wif)}
+                                className="p-1 bg-gray-700 hover:bg-gray-600"
+                              >
+                                QR
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             )}
           </CardContent>
@@ -544,20 +526,18 @@ export default function BitcoinAddressPage() {
               Address Types
             </CardTitle>
             <p className="text-xs text-gray-500">
-              Explanation of each address type, compatible wallets, and default
-              recommendation
+              Explanation of each address type, compatible wallets, and default recommendation
             </p>
           </CardHeader>
           <CardContent className="py-3">
             <ul className="space-y-4 text-sm">
-              {/* <li>
-                <strong>BIP32:</strong> Hierarchical Deterministic (HD) wallets
-                (e.g., "1...").
+              <li>
+                <strong>BIP32:</strong> Hierarchical Deterministic (HD) wallets with custom derivation paths (e.g., "1...").
                 <br />
                 Wallets: Electrum, Bitcoin Core, MultiBit.
                 <br />
                 Not recommended (foundational, lacks specificity).
-              </li> */}
+              </li>
               <li>
                 <strong>BIP44:</strong> Legacy HD (P2PKH, "1...").
                 <br />
@@ -568,47 +548,24 @@ export default function BitcoinAddressPage() {
               <li>
                 <strong>BIP49:</strong> Wrapped SegWit (P2SH-P2WPKH, "3...").
                 <br />
-                Wallets: Ledger, Trezor, Samourai, BlueWallet, Blockstream
-                Green.
+                Wallets: Ledger, Trezor, Samourai, BlueWallet, Blockstream Green.
                 <br />
                 Transitional choice, less efficient than native SegWit.
               </li>
               <li>
                 <strong>BIP84:</strong> Native SegWit (P2WPKH, "bc1...").
                 <br />
-                Wallets: Ledger, Trezor, Samourai, BlueWallet, Blockstream
-                Green, Electrum.
+                Wallets: Ledger, Trezor, Samourai, BlueWallet, Blockstream Green, Electrum.
                 <br />
-                <strong>Recommended Default:</strong> Best balance of fees,
-                support, and modernity.
+                <strong>Recommended Default:</strong> Best balance of fees, support, and modernity.
               </li>
               <li>
                 <strong>BIP86:</strong> Taproot (P2TR, "bc1p...").
                 <br />
-                Wallets: Ledger, Trezor Model T, Bitcoin Core, Sparrow,
-                BlueWallet. Offers superior privacy and scripting potential.
+                Wallets: Ledger, Trezor Model T, Bitcoin Core, Sparrow, BlueWallet.
                 <br />
-                Future-proof, but adoption still growing.
+                Offers superior privacy and scripting potential. Future-proof, but adoption still growing.
               </li>
-              {/* <li>
-                <strong>BIP141 Wrapped SegWit (via BIP49):</strong> Same as
-                BIP49 ("3...").
-                <br />
-                Wallets: Ledger, Trezor, Samourai, BlueWallet, Blockstream
-                Green.
-                <br />
-                Solid compatibility, not optimal.
-              </li>
-              <li>
-                <strong>BIP141 Native SegWit (via BIP84):</strong> Same as BIP84
-                ("bc1...").
-                <br />
-                Wallets: Ledger, Trezor, Samourai, BlueWallet, Blockstream
-                Green, Electrum.
-                <br />
-                <strong>Recommended Default:</strong> Efficient and widely
-                adopted.
-              </li> */}
             </ul>
           </CardContent>
         </Card>

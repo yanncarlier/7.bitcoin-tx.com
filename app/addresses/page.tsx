@@ -388,7 +388,7 @@ export default function BitcoinAddressPage() {
                 <h3 className="text-sm font-medium text-white">Generated Addresses</h3>
                 {generatedAccountXpub && (
                   <div className="flex items-center justify-between text-gray-200 mt-2">
-                    <span>
+                    <span className="text-xs text-gray-200">
                       <strong>Account Extended Public Key:</strong> {generatedAccountXpub}
                     </span>
                     <div className="flex space-x-2">
@@ -409,7 +409,7 @@ export default function BitcoinAddressPage() {
                 )}
                 {generatedBip32Xpub && (
                   <div className="flex items-center justify-between text-gray-200 mt-2">
-                    <span>
+                    <span className="text-xs text-gray-200">
                       <strong>Change Extended Public Key:</strong> {generatedBip32Xpub}
                     </span>
                     <div className="flex space-x-2">

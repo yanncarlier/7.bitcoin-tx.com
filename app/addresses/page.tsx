@@ -23,7 +23,6 @@ type AddressDetails = {
 
 type Bip32AddressListResponse = {
   account_xpub: string;
-  bip32_xpub: string;
   addresses: AddressDetails[];
 };
 
@@ -156,6 +155,7 @@ export default function BitcoinAddressPage() {
             Mnemonic and Addresses Generator
           </h1>
         </div>
+
         {/* First Card: Generate Mnemonic */}
         <Card className="mb-8 w-full md:w-4/5 md:mx-auto bg-gray-800 border border-gray-700 shadow-lg rounded-lg p-6">
           <CardHeader>
@@ -186,28 +186,31 @@ export default function BitcoinAddressPage() {
             </Button>
             {newMnemonic && newSeed && (
               <div className="mt-4 space-y-4">
+                {/* Mnemonic Field */}
                 <div>
                   <Label className="text-sm text-gray-200">Mnemonic</Label>
-                  <div className="relative">
+                  <div className="flex items-center">
+                    <div className="flex space-x-2 mr-2">
+                      <Button
+                        onClick={() => handleCopy(newMnemonic)}
+                        className="p-1 bg-gray-700 hover:bg-gray-600"
+                        size="sm"
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        onClick={() => showQr(newMnemonic)}
+                        className="p-1 bg-gray-700 hover:bg-gray-600"
+                        size="sm"
+                      >
+                        QR
+                      </Button>
+                    </div>
                     <textarea
                       value={newMnemonic}
                       readOnly
-                      className="mt-1 w-full text-sm p-2 border border-gray-300 rounded-md bg-gray-800 text-white pr-16 min-h-[80px]"
+                      className="flex-1 text-sm p-2 border border-gray-300 rounded-md bg-gray-800 text-white min-h-[80px]"
                     />
-                    <Button
-                      onClick={() => handleCopy(newMnemonic)}
-                      className="absolute top-1 right-1 p-1 bg-gray-700 hover:bg-gray-600"
-                      size="sm"
-                    >
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      onClick={() => showQr(newMnemonic)}
-                      className="absolute top-1 right-10 p-1 bg-gray-700 hover:bg-gray-600"
-                      size="sm"
-                    >
-                      QR
-                    </Button>
                   </div>
                   <Button
                     onClick={() => setAddressMnemonic(newMnemonic)}
@@ -216,28 +219,31 @@ export default function BitcoinAddressPage() {
                     Use this mnemonic for address generation
                   </Button>
                 </div>
+                {/* Seed Field */}
                 <div>
                   <Label className="text-sm text-gray-200">Seed</Label>
-                  <div className="relative">
+                  <div className="flex items-center">
+                    <div className="flex space-x-2 mr-2">
+                      <Button
+                        onClick={() => handleCopy(newSeed)}
+                        className="p-1 bg-gray-700 hover:bg-gray-600"
+                        size="sm"
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        onClick={() => showQr(newSeed)}
+                        className="p-1 bg-gray-700 hover:bg-gray-600"
+                        size="sm"
+                      >
+                        QR
+                      </Button>
+                    </div>
                     <textarea
                       value={newSeed}
                       readOnly
-                      className="mt-1 w-full text-sm p-2 border border-gray-300 rounded-md bg-gray-800 text-white pr-16 min-h-[80px]"
+                      className="flex-1 text-sm p-2 border border-gray-300 rounded-md bg-gray-800 text-white min-h-[80px]"
                     />
-                    <Button
-                      onClick={() => handleCopy(newSeed)}
-                      className="absolute top-1 right-1 p-1 bg-gray-700 hover:bg-gray-600"
-                      size="sm"
-                    >
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      onClick={() => showQr(newSeed)}
-                      className="absolute top-1 right-10 p-1 bg-gray-700 hover:bg-gray-600"
-                      size="sm"
-                    >
-                      QR
-                    </Button>
                   </div>
                 </div>
               </div>
@@ -247,6 +253,7 @@ export default function BitcoinAddressPage() {
             )}
           </CardContent>
         </Card>
+
         {/* Second Card: Generate Addresses */}
         <Card className="mb-8 w-full md:w-4/5 md:mx-auto bg-gray-800 border border-gray-700 shadow-lg rounded-lg p-6">
           <CardHeader>
@@ -260,34 +267,38 @@ export default function BitcoinAddressPage() {
           </CardHeader>
           <CardContent className="py-3">
             <form onSubmit={handleGenerateAddresses} className="space-y-4">
+              {/* Mnemonic Field */}
               <div>
                 <Label htmlFor="mnemonic" className="text-sm text-gray-200">
                   Mnemonic
                 </Label>
-                <div className="relative">
+                <div className="flex items-center">
+                  <div className="flex space-x-2 mr-2">
+                    <Button
+                      onClick={() => handleCopy(addressMnemonic)}
+                      className="p-1 bg-gray-700 hover:bg-gray-600"
+                      size="sm"
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      onClick={() => showQr(addressMnemonic)}
+                      className="p-1 bg-gray-700 hover:bg-gray-600"
+                      size="sm"
+                    >
+                      QR
+                    </Button>
+                  </div>
                   <textarea
                     id="mnemonic"
                     value={addressMnemonic}
                     onChange={(e) => setAddressMnemonic(e.target.value)}
-                    className="mt-1 w-full text-sm p-2 border border-gray-300 rounded-md bg-gray-800 text-white pr-16 min-h-[80px]"
+                    className="flex-1 text-sm p-2 border border-gray-300 rounded-md bg-gray-800 text-white min-h-[80px]"
                     placeholder="Enter your mnemonic phrase"
                   />
-                  <Button
-                    onClick={() => handleCopy(addressMnemonic)}
-                    className="absolute top-1 right-1 p-1 bg-gray-700 hover:bg-gray-600"
-                    size="sm"
-                  >
-                    <Copy className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    onClick={() => showQr(addressMnemonic)}
-                    className="absolute top-1 right-10 p-1 bg-gray-700 hover:bg-gray-600"
-                    size="sm"
-                  >
-                    QR
-                  </Button>
                 </div>
               </div>
+              {/* Passphrase Field */}
               <div>
                 <Label htmlFor="passphrase" className="text-sm text-gray-200">
                   Passphrase (optional)
@@ -301,6 +312,7 @@ export default function BitcoinAddressPage() {
                   placeholder="Enter passphrase"
                 />
               </div>
+              {/* Derivation Path (for BIP32) */}
               {addressType === "bip32" && (
                 <div>
                   <Label htmlFor="derivationPath" className="text-sm text-gray-200">
@@ -316,6 +328,7 @@ export default function BitcoinAddressPage() {
                   />
                 </div>
               )}
+              {/* Address Type Selection */}
               <div>
                 <Label htmlFor="addressType" className="text-sm text-gray-200">
                   Address Type
@@ -336,6 +349,7 @@ export default function BitcoinAddressPage() {
                   <option value="bip86">BIP86: Taproot (P2TR, starts with bc1p)</option>
                 </select>
               </div>
+              {/* Number of Addresses */}
               <div>
                 <Label htmlFor="numAddresses" className="text-sm text-gray-200">
                   Number of Addresses (1-10)
@@ -350,6 +364,7 @@ export default function BitcoinAddressPage() {
                   className="mt-1 w-full text-sm p-2 border border-gray-300 rounded-md bg-gray-800 text-white"
                 />
               </div>
+              {/* Include Private Keys Checkbox */}
               <div className="flex items-center">
                 <input
                   id="includePrivateKeys"
@@ -383,12 +398,10 @@ export default function BitcoinAddressPage() {
             {(generatedAddresses || generatedAccountXpub) && (
               <div className="mt-4">
                 <h3 className="text-sm font-medium text-white">Generated Addresses</h3>
+                {/* Account Extended Public Key */}
                 {generatedAccountXpub && (
-                  <div className="flex items-center justify-between text-gray-200 mt-2">
-                    <span className="text-xs text-gray-200">
-                      <strong>Account Extended Public Key:</strong> {generatedAccountXpub}
-                    </span>
-                    <div className="flex space-x-2">
+                  <div className="flex items-center mt-2">
+                    <div className="flex space-x-2 mr-2">
                       <Button
                         onClick={() => handleCopy(generatedAccountXpub)}
                         className="p-1 bg-gray-700 hover:bg-gray-600"
@@ -402,18 +415,19 @@ export default function BitcoinAddressPage() {
                         QR
                       </Button>
                     </div>
+                    <span className="text-xs text-gray-200">
+                      <strong>Account Extended Public Key:</strong> {generatedAccountXpub}
+                    </span>
                   </div>
                 )}
+                {/* Generated Addresses List */}
                 {generatedAddresses && (
                   <ul className="mt-2 space-y-2">
                     {generatedAddresses.map((addr, index) => (
                       <li key={index} className="text-xs text-gray-200">
                         {/* Derivation Path */}
-                        <div className="flex items-center justify-between">
-                          <span>
-                            <strong>Derivation Path:</strong> {addr.derivation_path}
-                          </span>
-                          <div className="flex space-x-2">
+                        <div className="flex items-center">
+                          <div className="flex space-x-2 mr-2">
                             <Button
                               onClick={() => handleCopy(addr.derivation_path)}
                               className="p-1 bg-gray-700 hover:bg-gray-600"
@@ -427,13 +441,13 @@ export default function BitcoinAddressPage() {
                               QR
                             </Button>
                           </div>
+                          <span>
+                            <strong>Derivation Path:</strong> {addr.derivation_path}
+                          </span>
                         </div>
                         {/* Address */}
-                        <div className="flex items-center justify-between">
-                          <span>
-                            <strong>Address:</strong> {addr.address}
-                          </span>
-                          <div className="flex space-x-2">
+                        <div className="flex items-center">
+                          <div className="flex space-x-2 mr-2">
                             <Button
                               onClick={() => handleCopy(addr.address)}
                               className="p-1 bg-gray-700 hover:bg-gray-600"
@@ -447,13 +461,13 @@ export default function BitcoinAddressPage() {
                               QR
                             </Button>
                           </div>
+                          <span>
+                            <strong>Address:</strong> {addr.address}
+                          </span>
                         </div>
                         {/* Public Key */}
-                        <div className="flex items-center justify-between">
-                          <span>
-                            <strong>Public Key:</strong> {addr.public_key}
-                          </span>
-                          <div className="flex space-x-2">
+                        <div className="flex items-center">
+                          <div className="flex space-x-2 mr-2">
                             <Button
                               onClick={() => handleCopy(addr.public_key)}
                               className="p-1 bg-gray-700 hover:bg-gray-600"
@@ -467,14 +481,14 @@ export default function BitcoinAddressPage() {
                               QR
                             </Button>
                           </div>
+                          <span>
+                            <strong>Public Key:</strong> {addr.public_key}
+                          </span>
                         </div>
                         {/* Private Key (if available) */}
                         {addr.private_key && (
-                          <div className="flex items-center justify-between text-red-500">
-                            <span>
-                              <strong>Private Key:</strong> {addr.private_key} (Keep this secret!)
-                            </span>
-                            <div className="flex space-x-2">
+                          <div className="flex items-center text-red-500">
+                            <div className="flex space-x-2 mr-2">
                               <Button
                                 onClick={() => handleCopy(addr.private_key ?? null)}
                                 className="p-1 bg-gray-700 hover:bg-gray-600"
@@ -488,15 +502,15 @@ export default function BitcoinAddressPage() {
                                 QR
                               </Button>
                             </div>
+                            <span>
+                              <strong>Private Key:</strong> {addr.private_key} (Keep this secret!)
+                            </span>
                           </div>
                         )}
                         {/* WIF (if available) */}
                         {addr.wif && (
-                          <div className="flex items-center justify-between text-red-500">
-                            <span>
-                              <strong>WIF (Wallet Import Format):</strong> {addr.wif} (Keep this secret!)
-                            </span>
-                            <div className="flex space-x-2">
+                          <div className="flex items-center text-red-500">
+                            <div className="flex space-x-2 mr-2">
                               <Button
                                 onClick={() => handleCopy(addr.wif ?? null)}
                                 className="p-1 bg-gray-700 hover:bg-gray-600"
@@ -510,6 +524,9 @@ export default function BitcoinAddressPage() {
                                 QR
                               </Button>
                             </div>
+                            <span>
+                              <strong>WIF (Wallet Import Format):</strong> {addr.wif} (Keep this secret!)
+                            </span>
                           </div>
                         )}
                       </li>
@@ -520,6 +537,7 @@ export default function BitcoinAddressPage() {
             )}
           </CardContent>
         </Card>
+
         {/* Third Card: Address Types */}
         <Card className="mb-8 w-full md:w-4/5 md:mx-auto bg-gray-800 border border-gray-700 shadow-lg rounded-lg p-6">
           <CardHeader>
@@ -570,6 +588,7 @@ export default function BitcoinAddressPage() {
             </ul>
           </CardContent>
         </Card>
+
         {/* QR Code Modal */}
         {qrContent && (
           <div

@@ -42,7 +42,6 @@ export default function BitcoinAddressPage() {
   const [addressIncludePrivateKeys, setAddressIncludePrivateKeys] = useState<boolean>(false);
   const [generatedAddresses, setGeneratedAddresses] = useState<AddressDetails[] | null>(null);
   const [generatedAccountXpub, setGeneratedAccountXpub] = useState<string | null>(null);
-  const [generatedBip32Xpub, setGeneratedBip32Xpub] = useState<string | null>(null);
   const [isLoadingAddresses, setIsLoadingAddresses] = useState<boolean>(false);
   const [errorAddresses, setErrorAddresses] = useState<string | null>(null);
 
@@ -105,7 +104,6 @@ export default function BitcoinAddressPage() {
     setErrorAddresses(null);
     setGeneratedAddresses(null);
     setGeneratedAccountXpub(null);
-    setGeneratedBip32Xpub(null);
     const requestBody = {
       mnemonic: addressMnemonic,
       passphrase: addressPassphrase,
@@ -126,7 +124,6 @@ export default function BitcoinAddressPage() {
       }
       const data: Bip32AddressListResponse = await response.json();
       setGeneratedAccountXpub(data.account_xpub);
-      setGeneratedBip32Xpub(data.bip32_xpub);
       setGeneratedAddresses(data.addresses);
     } catch (err) {
       setErrorAddresses(err instanceof Error ? err.message : "An error occurred");
@@ -383,7 +380,7 @@ export default function BitcoinAddressPage() {
             {errorAddresses && (
               <p className="text-red-500 text-xs mt-3">{errorAddresses}</p>
             )}
-            {(generatedAddresses || generatedAccountXpub || generatedBip32Xpub) && (
+            {(generatedAddresses || generatedAccountXpub) && (
               <div className="mt-4">
                 <h3 className="text-sm font-medium text-white">Generated Addresses</h3>
                 {generatedAccountXpub && (
@@ -400,27 +397,6 @@ export default function BitcoinAddressPage() {
                       </Button>
                       <Button
                         onClick={() => showQr(generatedAccountXpub)}
-                        className="p-1 bg-gray-700 hover:bg-gray-600"
-                      >
-                        QR
-                      </Button>
-                    </div>
-                  </div>
-                )}
-                {generatedBip32Xpub && (
-                  <div className="flex items-center justify-between text-gray-200 mt-2">
-                    <span className="text-xs text-gray-200">
-                      <strong>Change Extended Public Key:</strong> {generatedBip32Xpub}
-                    </span>
-                    <div className="flex space-x-2">
-                      <Button
-                        onClick={() => handleCopy(generatedBip32Xpub)}
-                        className="p-1 bg-gray-700 hover:bg-gray-600"
-                      >
-                        <Copy className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        onClick={() => showQr(generatedBip32Xpub)}
                         className="p-1 bg-gray-700 hover:bg-gray-600"
                       >
                         QR

@@ -36,15 +36,14 @@ export default function Hero() {
           <Card className="py-4">
             <CardHeader className="text-center text-1xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl">
               <CardTitle className="text-2xl font-bold text-orange-500">
-                Simplified POS SaaS for Stores{" "}
-                <span className="text-orange-500">(Beta)</span>
+                Payment gateway and POS SaaS for Stores
               </CardTitle>
             </CardHeader>
             <CardContent className="text-center sm:mt-5 sm:text-2xl lg:text-xl xl:text-2xl">
-              Bitcoin-tx is a Point-of-Sale (POS) Software-as-a-Service (SaaS)
+              Bitcoin-tx is a Payment gateway and Point-of-Sale (POS) Software-as-a-Service (SaaS)
               designed for stores and businesses to easily accept cryptocurrency
               payments. It’s secure, private, and self-managed, allowing you to
-              process payments without intermediaries.
+              process payments without intermediaries and in compliance.
             </CardContent>
           </Card>
         </div>

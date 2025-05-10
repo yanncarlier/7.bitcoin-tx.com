@@ -22,6 +22,7 @@ export default function Hero() {
               </CardTitle>
             </CardHeader>
             <CardContent className="text-center sm:mt-5 sm:text-2xl lg:text-xl xl:text-2xl">
+            Bitcoin and stable coins payment gateway. <br />
             Accept crypto payments securely and in compliance.<br />Try it free for 7 days!
             </CardContent>
           </Card>

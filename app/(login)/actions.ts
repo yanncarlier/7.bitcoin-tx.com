@@ -53,12 +53,6 @@ async function logActivity(
 }
 
 // Schema for sign-in form validation
-// const signInSchema = z.object({
-//   email: z.string().email().min(3).max(255),
-//   password: z.string().min(14).max(100),
-// });
-
-// Schema for sign-in form validation
 const signInSchema = z.object({
   email: z.string().email().min(3).max(255),
   password: z.string().max(100),
@@ -122,12 +116,6 @@ export const signIn = validatedAction(signInSchema, async (data, formData) => {
 });
 
 // Schema for sign-up form validation
-// const signUpSchema = z.object({
-//   email: z.string().email(),
-//   password: z.string().min(14),
-//   inviteId: z.string().optional(),
-// });
-
 const signUpSchema = z.object({
   email: z.string().email(),
   password: z
@@ -309,18 +297,6 @@ export async function signOut() {
   (await cookies()).delete("session");
 }
 
-// Schema for password update validation
-// const updatePasswordSchema = z
-//   .object({
-//     currentPassword: z.string().min(8).max(100),
-//     newPassword: z.string().min(8).max(100),
-//     confirmPassword: z.string().min(8).max(100),
-//   })
-//   .refine((data) => data.newPassword === data.confirmPassword, {
-//     message: "Passwords don't match",
-//     path: ["confirmPassword"],
-//   });
-
 // Update Password Schema
 const updatePasswordSchema = z
   .object({
@@ -376,11 +352,6 @@ export const updatePassword = validatedActionWithUser(
     return { success: "Password updated successfully." };
   }
 );
-
-// Schema for account deletion validation
-// const deleteAccountSchema = z.object({
-//   password: z.string().min(8).max(100),
-// });
 
 // Schema for account deletion validation
 const deleteAccountSchema = z.object({
@@ -562,7 +533,7 @@ export const inviteTeamMember = validatedActionWithUser(
   }
 );
 
-//  ################### generate Mnemonic #########################
+// ################### generate Mnemonic #########################
 export const generateMnemonic = async (): Promise<ActionState> => {
   const apiAddresses = process.env.BE_API_ADDRESSES; // Base URL for the API
   if (!apiAddresses) {
@@ -585,6 +556,46 @@ export const generateMnemonic = async (): Promise<ActionState> => {
     };
   }
 };
+
+// ################### generate BIP84 Address #########################
+export const generateBip84Address = async (mnemonic: string): Promise<ActionState> => {
+  const apiAddresses = process.env.BE_API_ADDRESSES;
+  if (!apiAddresses) {
+    return { error: "API address not configured." };
+  }
+
+  const payload = {
+    mnemonic: mnemonic,
+    passphrase: "",
+    num_addresses: 1,
+    include_private_keys: false,
+  };
+
+  try {
+    const response = await fetch(`${apiAddresses}/generate-bip84-addresses`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to generate BIP84 address");
+    }
+
+    const data = await response.json();
+    return {
+      success: "BIP84 address generated successfully.",
+      data: data,
+    };
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : "An error occurred",
+    };
+  }
+};
+
 // ############################
 // BTCPay Create a new store and wallet
 // ############################
@@ -627,16 +638,11 @@ export const createStore = async (
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
-  //  const storeName = `store-${year}-${month}-${day}`;
   const hours = String(date.getHours()).padStart(2, "0");
   const minutes = String(date.getMinutes()).padStart(2, "0");
-  // const storeName = `store-${year}-${month}-${day}-${hours}-${minutes}`;
   const seconds = String(date.getSeconds()).padStart(2, "0");
-  // const storeName = `store-${year}-${month}-${day}-${hours}-${minutes}-${seconds}`;
   const storeName = `Hot_Store-${year}-${month}-${day}-${hours}-${minutes}-${seconds}`;
 
-  
-  // https://btcpay.bitcoin-tx.com/docs#operation/Stores_CreateStore
   const storePayload = JSON.stringify({
     name: storeName,
     website: btcpayUrl,
@@ -669,19 +675,6 @@ export const createStore = async (
     const data: any = { store: storeData };
 
     // Step 2: Prepare wallet creation payload (used for both wallets)
-    // https://btcpay.bitcoin-tx.com/docs#operation/StoreOnChainPaymentMethods_GenerateOnChainWallet
-    //
-    // const walletPayload = JSON.stringify({
-    //   existingMnemonic: mnemonic || null,
-    //   passphrase: "",
-    //   accountNumber: 0,
-    //   savePrivateKeys: false,
-    //   importKeysToRPC: false,
-    //   wordList: "English",
-    //   wordCount: 12,
-    //   scriptPubKeyType: "Segwit",
-    // });
-
     let walletPayload;
     if (mnemonic) {
       walletPayload = JSON.stringify({

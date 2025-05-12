@@ -14,7 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Loader2, Copy } from "lucide-react";
 import { useUser } from "@/lib/auth";
-import { createStore, generateMnemonic } from "@/app/(login)/actions";
+import { createStore, generateMnemonic, generateBip84Address } from "@/app/(login)/actions";
 import { QRCodeCanvas } from "qrcode.react";
 
 export default function StoreSettings() {
@@ -33,8 +33,9 @@ export default function StoreSettings() {
     { error: "", success: "", data: "" }
   );
 
-  // State for mnemonic handling
+  // State for mnemonic and account_xpub handling
   const [mnemonic, setMnemonic] = useState<string>("");
+  const [accountXpub, setAccountXpub] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [generateError, setGenerateError] = useState<string | null>(null);
   const [qrContent, setQrContent] = useState<string | null>(null);
@@ -54,15 +55,27 @@ export default function StoreSettings() {
     );
   }
 
-  // Handle mnemonic generation
+  // Handle mnemonic generation and account_xpub retrieval
   const handleGenerateMnemonic = async () => {
     setIsGenerating(true);
     setGenerateError(null);
-    const result = await generateMnemonic();
-    if (result.error) {
-      setGenerateError(result.error);
-    } else if (result.data) {
-      setMnemonic(result.data);
+
+    // Generate mnemonic
+    const mnemonicResult = await generateMnemonic();
+    if (mnemonicResult.error) {
+      setGenerateError(mnemonicResult.error);
+      setIsGenerating(false);
+      return;
+    }
+    const generatedMnemonic = mnemonicResult.data;
+    setMnemonic(generatedMnemonic);
+
+    // Generate BIP84 address and extract account_xpub
+    const addressResult = await generateBip84Address(generatedMnemonic);
+    if (addressResult.error) {
+      setGenerateError(addressResult.error);
+    } else if (addressResult.data) {
+      setAccountXpub(addressResult.data.account_xpub);
     }
     setIsGenerating(false);
   };
@@ -185,6 +198,38 @@ export default function StoreSettings() {
                   <p className="text-red-500 text-xs mt-1">{generateError}</p>
                 )}
               </div>
+              {accountXpub && (
+                <div className="mt-4">
+                  <Label className="text-sm text-gray-200">
+                    Account Extended Public Key (xpub)
+                  </Label>
+                  <div className="flex items-start mt-1 space-x-2">
+                    <textarea
+                      value={accountXpub}
+                      readOnly
+                      className="flex-1 text-sm p-2 border border-gray-300 rounded-md bg-gray-800 text-white min-h-[80px]"
+                    />
+                    <div className="flex space-x-2">
+                      <Button
+                        type="button"
+                        onClick={() => handleCopy(accountXpub)}
+                        className="p-1 bg-gray-700 hover:bg-gray-600"
+                        size="sm"
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        type="button"
+                        onClick={() => showQr(accountXpub)}
+                        className="p-1 bg-gray-700 hover:bg-gray-600"
+                        size="sm"
+                      >
+                        QR
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
               <Button
                 type="submit"
                 className="btn-primary text-xl font-semibold text-white"

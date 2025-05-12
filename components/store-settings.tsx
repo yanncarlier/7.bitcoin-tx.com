@@ -95,139 +95,169 @@ export default function StoreSettings() {
       <Card className="mb-8 w-full bg-gray-800 border border-gray-700 shadow-lg rounded-lg p-6 md:max-w-md lg:max-w-lg xl:max-w-xl">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-orange-500">
-            Create a New Store
+            New Store
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <form className="space-y-4" onSubmit={handleSubmit}>
-            <div>
-              <Label htmlFor="email" className="text-sm text-gray-200">
-                Email
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                defaultValue={user?.email || ""}
-                disabled
-                className="mt-1 w-full rounded-md px-3 py-1.5 text-sm border-gray-300"
-              />
-              <input type="hidden" name="email" value={user?.email || ""} />
-            </div>
-            <div>
-              <Label htmlFor="password" className="text-sm text-gray-200">
-                Password
-              </Label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                required
-                className="mt-1 w-full rounded-md px-3 py-1.5 text-sm border-gray-300"
-              />
-            </div>
-            <div>
-              <Label htmlFor="mnemonic" className="text-sm text-gray-200">
-                Mnemonic (optional)
-              </Label>
-              <div className="flex items-start mt-1 space-x-2">
-                <textarea
-                  id="mnemonic"
-                  name="mnemonic"
-                  value={mnemonic}
-                  onChange={(e) => setMnemonic(e.target.value)}
-                  className="flex-1 text-sm p-2 border border-gray-300 rounded-md bg-gray-800 text-white min-h-[80px]"
-                  placeholder="Enter mnemonic phrase"
+          {!state.success ? (
+            <form className="space-y-4" onSubmit={handleSubmit}>
+              <div>
+                <Label htmlFor="email" className="text-sm text-gray-200">
+                  Email
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  defaultValue={user?.email || ""}
+                  disabled
+                  className="mt-1 w-full rounded-md px-3 py-1.5 text-sm border-gray-300"
                 />
-                <div className="flex flex-col space-y-2">
-                  <div className="flex space-x-2">
+                <input type="hidden" name="email" value={user?.email || ""} />
+              </div>
+              <div>
+                <Label htmlFor="password" className="text-sm text-gray-200">
+                  Password
+                </Label>
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  className="mt-1 w-full rounded-md px-3 py-1.5 text-sm border-gray-300"
+                />
+              </div>
+              <div>
+                <Label htmlFor="mnemonic" className="text-sm text-gray-200">
+                  Mnemonic (optional)
+                </Label>
+                <div className="flex items-start mt-1 space-x-2">
+                  <textarea
+                    id="mnemonic"
+                    name="mnemonic"
+                    value={mnemonic}
+                    onChange={(e) => setMnemonic(e.target.value)}
+                    className="flex-1 text-sm p-2 border border-gray-300 rounded-md bg-gray-800 text-white min-h-[80px]"
+                    placeholder="Enter mnemonic phrase"
+                  />
+                  <div className="flex flex-col space-y-2">
+                    <div className="flex space-x-2">
+                      <Button
+                        type="button"
+                        onClick={() => mnemonic && handleCopy(mnemonic)}
+                        className="p-1 bg-gray-700 hover:bg-gray-600"
+                        size="sm"
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        type="button"
+                        onClick={() => mnemonic && showQr(mnemonic)}
+                        className="p-1 bg-gray-700 hover:bg-gray-600"
+                        size="sm"
+                      >
+                        QR
+                      </Button>
+                    </div>
                     <Button
                       type="button"
-                      onClick={() => mnemonic && handleCopy(mnemonic)}
-                      className="p-1 bg-gray-700 hover:bg-gray-600"
-                      size="sm"
+                      onClick={handleGenerateMnemonic}
+                      className="btn-primary text-white w-full"
+                      disabled={isGenerating}
                     >
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      type="button"
-                      onClick={() => mnemonic && showQr(mnemonic)}
-                      className="p-1 bg-gray-700 hover:bg-gray-600"
-                      size="sm"
-                    >
-                      QR
+                      {isGenerating ? (
+                        <>
+                          <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+                          Generating
+                        </>
+                      ) : (
+                        "Generate"
+                      )}
                     </Button>
                   </div>
-                  <Button
-                    type="button"
-                    onClick={handleGenerateMnemonic}
-                    className="btn-primary text-white w-full"
-                    disabled={isGenerating}
-                  >
-                    {isGenerating ? (
-                      <>
-                        <Loader2 className="mr-1 h-4 w-4 animate-spin" />
-                        Generating
-                      </>
-                    ) : (
-                      "Generate"
-                    )}
-                  </Button>
                 </div>
+                <p className="text-red-500 text-xs mt-1">
+                  Caution: If you provide a mnemonic, ensure it is stored securely. Anyone with access can control your wallet.
+                </p>
+                <p className="text-yellow-500 text-xs mt-1">
+                  Important: Save your mnemonic and store it securely offline as a backup. It’s your key to recovering your funds in case of an emergency.
+                </p>
+                {generateError && (
+                  <p className="text-red-500 text-xs mt-1">{generateError}</p>
+                )}
               </div>
-              <p className="text-red-500 text-xs mt-1">
-                Caution: If you provide a mnemonic, ensure it is stored securely. Anyone with access can control your wallet.
-              </p>
-              <p className="text-yellow-500 text-xs mt-1">
-                Important: Save your mnemonic and store it securely offline as a backup. It’s your key to recovering your funds in case of an emergency.
-              </p>
-              {generateError && (
-                <p className="text-red-500 text-xs mt-1">{generateError}</p>
+              <Button
+                type="submit"
+                className="btn-primary text-xl font-semibold text-white"
+                disabled={isPending}
+              >
+                {isPending ? (
+                  <>
+                    <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+                    Creating
+                  </>
+                ) : (
+                  "Create Store"
+                )}
+              </Button>
+            </form>
+          ) : (
+            <div className="mt-4 space-y-2">
+              <p className="text-green-500 text-xs">{state.success}</p>
+              <Button
+                className="btn-primary text-xl font-semibold text-white"
+                asChild
+              >
+                <a
+                  href={`https://btcpay.bitcoin-tx.com/stores/${state.data.store.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Store Sign In
+                </a>
+              </Button>
+              {state.data.btcWallet && state.data.btcWallet.mnemonic && (
+                <div className="mt-4">
+                  <Label className="text-sm text-gray-200">
+                    Mnemonic
+                  </Label>
+                  <div className="flex items-start mt-1 space-x-2">
+                    <textarea
+                      value={state.data.btcWallet.mnemonic}
+                      readOnly
+                      className="flex-1 text-sm p-2 border border-gray-300 rounded-md bg-gray-800 text-white min-h-[80px]"
+                    />
+                    <div className="flex space-x-2">
+                      <Button
+                        type="button"
+                        onClick={() => handleCopy(state.data.btcWallet.mnemonic)}
+                        className="p-1 bg-gray-700 hover:bg-gray-600"
+                        size="sm"
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        type="button"
+                        onClick={() => showQr(state.data.btcWallet.mnemonic)}
+                        className="p-1 bg-gray-700 hover:bg-gray-600"
+                        size="sm"
+                      >
+                        QR
+                      </Button>
+                    </div>
+                  </div>
+                  <p className="text-yellow-500 text-xs mt-2">
+                    Important: Save this mnemonic and store it securely offline as a backup. It’s your key to recovering your funds in case of an emergency.
+                  </p>
+                  <p className="text-red-500 text-xs mt-1">
+                    Caution: Anyone with access to this mnemonic can take full control of your wallet. Keep it safe!
+                  </p>
+                </div>
               )}
             </div>
-            <Button
-              type="submit"
-              className="btn-primary text-xl font-semibold text-white"
-              disabled={isPending}
-            >
-              {isPending ? (
-                <>
-                  <Loader2 className="mr-1 h-4 w-4 animate-spin" />
-                  Creating
-                </>
-              ) : (
-                "Create Store"
-              )}
-            </Button>
-          </form>
-          <div className="mt-4 space-y-2">
-            {state.error && (
-              <p className="text-red-500 text-xs">{state.error}</p>
-            )}
-            {state.success && (
-              <p className="text-green-500 text-xs">{state.success}</p>
-            )}
-            {state.data && (
-              <>
-                <Button
-                  className="btn-primary text-xl font-semibold text-white"
-                  asChild
-                >
-                  <a
-                    href={`https://btcpay.bitcoin-tx.com/stores/${state.data.store.id}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Store Sign In
-                  </a>
-                </Button>
-                {state.data.btcWallet && state.data.btcWallet.mnemonic && (
-                  <div className="mt-4">
-                    {/* Optional: Add similar buttons here if displaying generated mnemonic */}
-                  </div>
-                )}
-              </>
-            )}
-          </div>
+          )}
+          {state.error && !state.success && (
+            <p className="text-red-500 text-xs mt-4">{state.error}</p>
+          )}
         </CardContent>
       </Card>
 

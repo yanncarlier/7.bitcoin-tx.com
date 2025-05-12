@@ -14,7 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Loader2, Copy } from "lucide-react";
 import { useUser } from "@/lib/auth";
-import { createStore, generateMnemonic, generateBip84Address } from "@/app/(login)/actions";
+import { createStore } from "@/app/(login)/actions";
 import { QRCodeCanvas } from "qrcode.react";
 
 export default function StoreSettings() {
@@ -55,29 +55,40 @@ export default function StoreSettings() {
     );
   }
 
-  // Handle mnemonic generation and account_xpub retrieval
+  const apiAddresses = process.env.NEXT_PUBLIC_API_ADDRESSES || "http://0.0.0.0:8000";
+  // Handle mnemonic generation and account_xpub retrieval via API calls
   const handleGenerateMnemonic = async () => {
     setIsGenerating(true);
     setGenerateError(null);
+    try {
+      // Generate mnemonic via API
+      // const mnemonicResponse = await fetch("/api/generate-mnemonic");
+      const mnemonicResponse = await fetch(`${apiAddresses}/generate-mnemonic`);
+      if (!mnemonicResponse.ok) {
+        const errorData = await mnemonicResponse.json();
+        throw new Error(errorData.detail || "Failed to generate mnemonic");
+      }
+      const mnemonicData = await mnemonicResponse.json();
+      const generatedMnemonic = mnemonicData.BIP39Mnemonic;
+      setMnemonic(generatedMnemonic);
 
-    // Generate mnemonic
-    const mnemonicResult = await generateMnemonic();
-    if (mnemonicResult.error) {
-      setGenerateError(mnemonicResult.error);
+      // Generate account xpub via API
+      const addressResponse = await fetch(`${apiAddresses}/generate-bip84-addresses`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mnemonic: generatedMnemonic, num_addresses: 1 }),
+      });
+      if (!addressResponse.ok) {
+        const errorData = await addressResponse.json();
+        throw new Error(errorData.detail || "Failed to generate addresses");
+      }
+      const addressData = await addressResponse.json();
+      setAccountXpub(addressData.account_xpub);
+    } catch (err) {
+      setGenerateError(err instanceof Error ? err.message : "An error occurred");
+    } finally {
       setIsGenerating(false);
-      return;
     }
-    const generatedMnemonic = mnemonicResult.data;
-    setMnemonic(generatedMnemonic);
-
-    // Generate BIP84 address and extract account_xpub
-    const addressResult = await generateBip84Address(generatedMnemonic);
-    if (addressResult.error) {
-      setGenerateError(addressResult.error);
-    } else if (addressResult.data) {
-      setAccountXpub(addressResult.data.account_xpub);
-    }
-    setIsGenerating(false);
   };
 
   // Handle form submission
@@ -262,9 +273,7 @@ export default function StoreSettings() {
               </Button>
               {state.data.btcWallet && state.data.btcWallet.mnemonic && (
                 <div className="mt-4">
-                  <Label className="text-sm text-gray-200">
-                    Mnemonic
-                  </Label>
+                  <Label className="text-sm text-gray-200">Mnemonic</Label>
                   <div className="flex items-start mt-1 space-x-2">
                     <textarea
                       value={state.data.btcWallet.mnemonic}

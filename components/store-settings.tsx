@@ -12,21 +12,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Loader2 } from "lucide-react";
+import { Loader2, Copy } from "lucide-react";
 import { useUser } from "@/lib/auth";
 import { createStore, generateMnemonic } from "@/app/(login)/actions";
+import { QRCodeCanvas } from "qrcode.react";
 
 export default function StoreSettings() {
   const { userPromise } = useUser();
   const user = use(userPromise);
   const router = useRouter();
+
+  // State for createStore action
   type ActionState = {
     error: string;
     success: string;
     data: any;
   };
-
-  // State for createStore action
   const [state, formAction, isPending] = useActionState<ActionState, FormData>(
     createStore as any,
     { error: "", success: "", data: "" }
@@ -34,11 +35,9 @@ export default function StoreSettings() {
 
   // State for mnemonic handling
   const [mnemonic, setMnemonic] = useState<string>("");
-  const [generatedMnemonic, setGeneratedMnemonic] = useState<string | null>(
-    null
-  );
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [generateError, setGenerateError] = useState<string | null>(null);
+  const [qrContent, setQrContent] = useState<string | null>(null);
 
   // Redirect if user is not authenticated
   useEffect(() => {
@@ -59,13 +58,11 @@ export default function StoreSettings() {
   const handleGenerateMnemonic = async () => {
     setIsGenerating(true);
     setGenerateError(null);
-    setGeneratedMnemonic(null);
-
     const result = await generateMnemonic();
     if (result.error) {
       setGenerateError(result.error);
     } else if (result.data) {
-      setGeneratedMnemonic(result.data);
+      setMnemonic(result.data);
     }
     setIsGenerating(false);
   };
@@ -78,117 +75,43 @@ export default function StoreSettings() {
     });
   };
 
+  // Handle copy to clipboard
+  const handleCopy = (text: string) => {
+    navigator.clipboard.writeText(text);
+    alert("Copied to clipboard!");
+  };
+
+  // Show QR code
+  const showQr = (content: string) => {
+    setQrContent(content);
+  };
+
   return (
     <section>
       <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-white">
-      Create a new store
+        Create a new store
       </h1>
 
-      {/* Generate Mnemonic Section */}
-      {/* <Card className="mb-8 w-full bg-gray-800 border border-gray-700 shadow-lg rounded-lg p-6 md:max-w-md lg:max-w-lg xl:max-w-xl">
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold text-orange-500">
-            Generate Mnemonic for Wallet (Optional)
-          </CardTitle>
-          <p className="text-xs text-gray-200">
-            
-            If you don’t generate here a mnemonic for your wallet, the system
-            will automatically generate one when you create a store and wallet
-            below. Use this feature at your own risk.
-          </p>
-        </CardHeader>
-        <CardContent className="py-3">
-          <Button
-            onClick={handleGenerateMnemonic}
-            className="btn-primary ml-2 text-xl font-semibold text-white "
-            disabled={isGenerating}
-          >
-            {isGenerating ? (
-              <>
-                <Loader2 className="mr-1 h-4 w-4 animate-spin" />
-                Generating
-              </>
-            ) : (
-              "Generate Mnemonic"
-            )}
-          </Button>
-          {generatedMnemonic && (
-            <div className="mt-4 space-y-2">
-              <Label className="text-sm text-gray-200">
-                Generated Mnemonic
-              </Label>
-              <textarea
-                value={generatedMnemonic}
-                readOnly
-                className="mt-1 w-full text-sm p-2 border border-gray-300 rounded-md bg-gray-800 text-white min-h-[80px]"
-              />
-              <p className="text-yellow-500 text-xs mb-2">
-                Important: If you use this mnemonic for store wallets, save this
-                mnemonic and store it securely offline as a backup. It’s your
-                key to recovering your funds in case of an emergency.
-              </p>
-              <p className="text-red-500 text-xs mb-2">
-                Caution: If you use this mnemonic for store wallets, anyone with
-                access to this mnemonic can take full control of your wallet.
-                Keep it safe!
-              </p>
-
-              <Button
-                onClick={() => setMnemonic(generatedMnemonic)}
-                className="btn-primary ml-2 text-xl font-semibold text-white"
-              >
-                Use this mnemonic for store wallets
-              </Button>
-            </div>
-          )}
-          {generateError && (
-            <p className="text-red-500 text-xs mt-3">{generateError}</p>
-          )}
-        </CardContent>
-      </Card> */}
-
-      {/* Create Store Form */}
       <Card className="mb-8 w-full bg-gray-800 border border-gray-700 shadow-lg rounded-lg p-6 md:max-w-md lg:max-w-lg xl:max-w-xl">
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-orange-500">
-            {/* Create a new store and wallets */}
+            Create a New Store
           </CardTitle>
-          <p>
-            Use the same credentials to create a new store with hot wallets for
-            BTC, LBTC, USDt, and LCAD.
-          </p>
-          <p className="text-xs text-gray-500">
-          We are not responsible for any losses. Hot wallets carry security risks if not properly managed. Use this feature at your own risk.
-            {/* If you disclose the information
-            produced on this page to others, they could take your assets. */}
-          </p>
         </CardHeader>
-        <CardContent className="py-3">
+        <CardContent>
           <form className="space-y-4" onSubmit={handleSubmit}>
             <div>
               <Label htmlFor="email" className="text-sm text-gray-200">
                 Email
-              </Label>{" "}
-              {/* <br />
-              <Label htmlFor="email" className="text-sm text-gray-200">
-                {user?.email}
-              </Label> */}
+              </Label>
               <Input
-                // id="email"
-                // name="email"
-                // type="email"
-                placeholder="Email"
+                id="email"
+                type="email"
                 defaultValue={user?.email || ""}
-                required
                 disabled
                 className="mt-1 w-full rounded-md px-3 py-1.5 text-sm border-gray-300"
               />
-              <input
-                id="email"
-                type="hidden"
-                name="email"
-                value={user?.email || ""}
-              />
+              <input type="hidden" name="email" value={user?.email || ""} />
             </div>
             <div>
               <Label htmlFor="password" className="text-sm text-gray-200">
@@ -198,7 +121,6 @@ export default function StoreSettings() {
                 id="password"
                 name="password"
                 type="password"
-                placeholder="Password"
                 required
                 className="mt-1 w-full rounded-md px-3 py-1.5 text-sm border-gray-300"
               />
@@ -207,19 +129,64 @@ export default function StoreSettings() {
               <Label htmlFor="mnemonic" className="text-sm text-gray-200">
                 Mnemonic (optional)
               </Label>
-              <Input
-                id="mnemonic"
-                name="mnemonic"
-                type="text"
-                placeholder="Enter mnemonic phrase"
-                value={mnemonic}
-                onChange={(e) => setMnemonic(e.target.value)}
-                className="mt-1 w-full rounded-md px-3 py-1.5 text-sm border-gray-300"
-              />
+              <div className="flex items-start mt-1 space-x-2">
+                <textarea
+                  id="mnemonic"
+                  name="mnemonic"
+                  value={mnemonic}
+                  onChange={(e) => setMnemonic(e.target.value)}
+                  className="flex-1 text-sm p-2 border border-gray-300 rounded-md bg-gray-800 text-white min-h-[80px]"
+                  placeholder="Enter mnemonic phrase"
+                />
+                <div className="flex flex-col space-y-2">
+                  <div className="flex space-x-2">
+                    <Button
+                      type="button"
+                      onClick={() => mnemonic && handleCopy(mnemonic)}
+                      className="p-1 bg-gray-700 hover:bg-gray-600"
+                      size="sm"
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={() => mnemonic && showQr(mnemonic)}
+                      className="p-1 bg-gray-700 hover:bg-gray-600"
+                      size="sm"
+                    >
+                      QR
+                    </Button>
+                  </div>
+                  <Button
+                    type="button"
+                    onClick={handleGenerateMnemonic}
+                    className="btn-primary text-white w-full"
+                    disabled={isGenerating}
+                  >
+                    {isGenerating ? (
+                      <>
+                        <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+                        Generating
+                      </>
+                    ) : (
+                      "Generate"
+                    )}
+                  </Button>
+                </div>
+              </div>
+              <p className="text-red-500 text-xs mt-1">
+                Caution: If you provide a mnemonic, ensure it is stored securely. Anyone with access can control your wallet.
+              </p>
+              <p className="text-yellow-500 text-xs mt-1">
+                Important: Save your mnemonic and store it securely offline as a backup. It’s your key to recovering your funds in case of an emergency.
+              </p>
+              {generateError && (
+                <p className="text-red-500 text-xs mt-1">{generateError}</p>
+              )}
             </div>
             <Button
               type="submit"
-              className="btn-primary ml-2 text-xl font-semibold text-white"
+              className="btn-primary text-xl font-semibold text-white"
               disabled={isPending}
             >
               {isPending ? (
@@ -232,7 +199,7 @@ export default function StoreSettings() {
               )}
             </Button>
           </form>
-          <div className="mt-3 space-y-2">
+          <div className="mt-4 space-y-2">
             {state.error && (
               <p className="text-red-500 text-xs">{state.error}</p>
             )}
@@ -240,46 +207,47 @@ export default function StoreSettings() {
               <p className="text-green-500 text-xs">{state.success}</p>
             )}
             {state.data && (
-              <Button
-                type="submit"
-                className="btn-primary ml-2 text-xl font-semibold text-white"
-                asChild
-              >
-                <a
-                  href={`https://btcpay.bitcoin-tx.com/stores/${state.data.store.id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
+              <>
+                <Button
+                  className="btn-primary text-xl font-semibold text-white"
+                  asChild
                 >
-                  Store Sign In
-                </a>
-              </Button>
+                  <a
+                    href={`https://btcpay.bitcoin-tx.com/stores/${state.data.store.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Store Sign In
+                  </a>
+                </Button>
+                {state.data.btcWallet && state.data.btcWallet.mnemonic && (
+                  <div className="mt-4">
+                    {/* Optional: Add similar buttons here if displaying generated mnemonic */}
+                  </div>
+                )}
+              </>
             )}
-            {state.data &&
-              state.data.btcWallet &&
-              state.data.btcWallet.mnemonic && (
-                <div className="mt-4">
-                  <Label className="text-sm text-gray-200">
-                    Wallets Mnemonic
-                  </Label>
-                  <p className="text-yellow-500 text-xs mb-2">
-                    Important: Save this mnemonic and store it securely offline
-                    as a backup. It’s your key to recovering your funds in case
-                    of an emergency.
-                  </p>
-                  <p className="text-red-500 text-xs mb-2">
-                    Caution: Anyone with access to this mnemonic can take full
-                    control of your wallet. Keep it safe!
-                  </p>
-                  <textarea
-                    value={state.data.btcWallet.mnemonic}
-                    readOnly
-                    className="mt-1 w-full text-sm p-2 border border-gray-300 rounded-md bg-gray-800 text-white min-h-[80px]"
-                  />
-                </div>
-              )}
           </div>
         </CardContent>
       </Card>
+
+      {/* QR Code Modal */}
+      {qrContent && (
+        <div
+          className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center"
+          onClick={() => setQrContent(null)}
+        >
+          <div className="bg-white p-4 rounded">
+            <QRCodeCanvas value={qrContent} size={256} level="H" />
+          </div>
+          <button
+            className="absolute top-4 right-4 text-white text-lg"
+            onClick={() => setQrContent(null)}
+          >
+            Close
+          </button>
+        </div>
+      )}
     </section>
   );
 }

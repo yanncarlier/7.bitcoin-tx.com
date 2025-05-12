@@ -632,8 +632,10 @@ export const createStore = async (
   const minutes = String(date.getMinutes()).padStart(2, "0");
   // const storeName = `store-${year}-${month}-${day}-${hours}-${minutes}`;
   const seconds = String(date.getSeconds()).padStart(2, "0");
-  const storeName = `store-${year}-${month}-${day}-${hours}-${minutes}-${seconds}`;
+  // const storeName = `store-${year}-${month}-${day}-${hours}-${minutes}-${seconds}`;
+  const storeName = `Hot_Store-${year}-${month}-${day}-${hours}-${minutes}-${seconds}`;
 
+  
   // https://btcpay.bitcoin-tx.com/docs#operation/Stores_CreateStore
   const storePayload = JSON.stringify({
     name: storeName,

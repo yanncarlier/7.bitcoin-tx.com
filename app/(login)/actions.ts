@@ -534,67 +534,67 @@ export const inviteTeamMember = validatedActionWithUser(
 );
 
 // ################### generate Mnemonic #########################
-export const generateMnemonic = async (): Promise<ActionState> => {
-  const apiAddresses = process.env.BE_API_ADDRESSES; // Base URL for the API
-  if (!apiAddresses) {
-    return { error: "API address not configured." };
-  }
+// export const generateMnemonic = async (): Promise<ActionState> => {
+//   const apiAddresses = process.env.BE_API_ADDRESSES; // Base URL for the API
+//   if (!apiAddresses) {
+//     return { error: "API address not configured." };
+//   }
 
-  try {
-    const response = await fetch(`${apiAddresses}/generate-mnemonic`);
-    if (!response.ok) {
-      throw new Error("Failed to generate mnemonic");
-    }
-    const data = await response.json();
-    return {
-      success: "Mnemonic generated successfully.",
-      data: data.BIP39Mnemonic,
-    };
-  } catch (error) {
-    return {
-      error: error instanceof Error ? error.message : "An error occurred",
-    };
-  }
-};
+//   try {
+//     const response = await fetch(`${apiAddresses}/generate-mnemonic`);
+//     if (!response.ok) {
+//       throw new Error("Failed to generate mnemonic");
+//     }
+//     const data = await response.json();
+//     return {
+//       success: "Mnemonic generated successfully.",
+//       data: data.BIP39Mnemonic,
+//     };
+//   } catch (error) {
+//     return {
+//       error: error instanceof Error ? error.message : "An error occurred",
+//     };
+//   }
+// };
 
 // ################### generate BIP84 Address #########################
-export const generateBip84Address = async (mnemonic: string): Promise<ActionState> => {
-  const apiAddresses = process.env.BE_API_ADDRESSES;
-  if (!apiAddresses) {
-    return { error: "API address not configured." };
-  }
+// export const generateBip84Address = async (mnemonic: string): Promise<ActionState> => {
+//   const apiAddresses = process.env.BE_API_ADDRESSES;
+//   if (!apiAddresses) {
+//     return { error: "API address not configured." };
+//   }
 
-  const payload = {
-    mnemonic: mnemonic,
-    passphrase: "",
-    num_addresses: 1,
-    include_private_keys: false,
-  };
+//   const payload = {
+//     mnemonic: mnemonic,
+//     passphrase: "",
+//     num_addresses: 1,
+//     include_private_keys: false,
+//   };
 
-  try {
-    const response = await fetch(`${apiAddresses}/generate-bip84-addresses`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
+//   try {
+//     const response = await fetch(`${apiAddresses}/generate-bip84-addresses`, {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/json",
+//       },
+//       body: JSON.stringify(payload),
+//     });
 
-    if (!response.ok) {
-      throw new Error("Failed to generate BIP84 address");
-    }
+//     if (!response.ok) {
+//       throw new Error("Failed to generate BIP84 address");
+//     }
 
-    const data = await response.json();
-    return {
-      success: "BIP84 address generated successfully.",
-      data: data,
-    };
-  } catch (error) {
-    return {
-      error: error instanceof Error ? error.message : "An error occurred",
-    };
-  }
-};
+//     const data = await response.json();
+//     return {
+//       success: "BIP84 address generated successfully.",
+//       data: data,
+//     };
+//   } catch (error) {
+//     return {
+//       error: error instanceof Error ? error.message : "An error occurred",
+//     };
+//   }
+// };
 
 // ############################
 // BTCPay Create a new store and wallet

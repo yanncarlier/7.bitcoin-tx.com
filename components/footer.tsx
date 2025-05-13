@@ -1,9 +1,12 @@
 // "use client";
 import Link from "next/link";
 // import { Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
-
+const apiurl = process.env.NEXT_PUBLIC_API_URL
 export function Footer() {
+  
+
   return (
+    
     <footer className=" border-gray-400">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -67,7 +70,7 @@ export function Footer() {
           className="text-gray-200 hover:text-white"
           target="_blank"
           rel="noopener noreferrer"
-          href="https://btcpay.bitcoin-tx.com/login"
+          href={apiurl + '/login'}
         > Store Sign in
         </a>
         </li>

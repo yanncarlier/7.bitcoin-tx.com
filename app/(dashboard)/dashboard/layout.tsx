@@ -23,30 +23,7 @@ export default function DashboardLayout({
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const navItems = [
-    // { href: "/", icon: Home, label: "Home" },
-    // { href: "/dashboard/addresses", icon: Settings, label: "Addresses" },
-    // { href: "/dashboard/stores", icon: Star, label: "Stores" },
-    // { href: "/dashboard/point-of-sale", icon: Star, label: "Point of sale" },
-    // { href: "/dashboard/crypto-charts", icon: Star, label: "Crypto charts" },
-    // { href: "/pricing", icon: Star, label: "Choose Plan" },
 
-    // {
-    //   href: "https://btcpay.bitcoin-tx.com/login?ReturnUrl=%2Fs",
-    //   target: "_blank",
-    //   icon: Settings,
-    //   label: "Store Sign In",
-    // },
-
-    //   <a
-    //   className="ml-2 text-xl font-semibold text-white"
-    //   target="_blank"
-    //   rel="noopener noreferrer"
-    //   href="https://btcpay.bitcoin-tx.com/login?ReturnUrl=%2F"
-    // >
-    //   Store Sign In
-    // </a>
-
-    // { href: "/dashboard/custody", icon: Settings, label: "Custody" },
     { href: "/dashboard", icon: Users, label: "Dashboard" },
 
     { href: "/dashboard/general", icon: Settings, label: "General" },

@@ -266,8 +266,7 @@ export default function StoreSettings() {
                 asChild
               >
                 <a
-                 
-                  href={apiurl + '/stores/${state.data.store.id'}
+                href={`${apiurl}/stores/${state.data.store.id}`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >

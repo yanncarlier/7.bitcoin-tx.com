@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 
+const apiurl = process.env.NEXT_PUBLIC_API_URL
+
 export function NavigationLinks() {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -47,7 +49,7 @@ export function NavigationLinks() {
           className="ml-2 text-xl font-semibold text-orange-500"
           target="_blank"
           rel="noopener noreferrer"
-          href="https://btcpay.bitcoin-tx.com/login?ReturnUrl=%2F"
+          href={apiurl + '/login'}
         >
           Store
         </a> <div className="ml-2 text-xl font-semibold text-white">|</div>

@@ -7,6 +7,7 @@ import {
   integer,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
+import { smallint } from 'drizzle-orm/gel-core';
 
 export const users = pgTable('users', {
   id: serial('id').primaryKey(),
@@ -17,6 +18,7 @@ export const users = pgTable('users', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
   deletedAt: timestamp('deleted_at'),
+  stores: integer("stores"),
 });
 
 export const teams = pgTable('teams', {

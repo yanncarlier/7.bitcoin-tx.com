@@ -112,6 +112,8 @@ export default function StoreSettings() {
     setQrContent(content);
   };
 
+
+
   return (
     <section>
       <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-white">

@@ -599,6 +599,8 @@ export const inviteTeamMember = validatedActionWithUser(
 // ############################
 // BTCPay Create a new store and wallet
 // ############################
+
+
 export const createStore = async (
   state: ActionState,
   formData: FormData
@@ -623,6 +625,34 @@ export const createStore = async (
   if (email !== user.email) {
     return { error: "The provided email does not match your account email." };
   }
+
+
+
+  // This query checks if the user has a store by looking for a record in the 'users' table
+  // where the 'stores' column is set to "1" (indicating a store exists).
+  // let existingUserStores = await db
+  // .select()
+  // .from(users)
+  // .where(eq(users.stores, "1"))
+  // .limit(1);
+
+ // Check if user already exists
+ let existingUserStores = await db
+ .select()
+ .from(users)
+ .where(and(eq(users.email, email), eq(users.stores, 1)))
+ .limit(1);
+
+
+ if (existingUserStores.length === 1) {
+   return { error: "You already have one store, you can delete it to create a new one or upgrade your Current Plan" };
+ } 
+  
+  // Check if the user has a store
+  // If the user doesn't have a store, update the 'stores' column to "1" (indicating a store exists)
+  // This is done to prevent multiple stores for the same user.
+ await db.update(users).set({ stores: 1 }).where(eq(users.email, email));
+
 
   // Proceed with store and wallet creation
   const authString = `${email}:${password}`;
@@ -804,4 +834,5 @@ export const createStore = async (
         "An unexpected error occurred while creating the store or wallets.",
     };
   }
+
 };

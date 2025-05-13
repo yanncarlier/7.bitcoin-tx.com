@@ -44,7 +44,7 @@ export function Footer() {
             <li>
             <a
               href="/Screenshots/index.html"
-              className="text-gray-200"
+              className="text-gray-200 hover:text-white"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -63,7 +63,13 @@ export function Footer() {
         </Link> 
         </li>
         <li>
-   
+        <a
+          className="text-gray-200 hover:text-white"
+          target="_blank"
+          rel="noopener noreferrer"
+          href="https://btcpay.bitcoin-tx.com/login"
+        > Store Sign in
+        </a>
         </li>
  
   

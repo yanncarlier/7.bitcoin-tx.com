@@ -17,6 +17,8 @@ import { useUser } from "@/lib/auth";
 import { createStore } from "@/app/(login)/actions";
 import { QRCodeCanvas } from "qrcode.react";
 
+const apiurl = process.env.NEXT_PUBLIC_API_URL
+
 export default function StoreSettings() {
   const { userPromise } = useUser();
   const user = use(userPromise);
@@ -264,7 +266,8 @@ export default function StoreSettings() {
                 asChild
               >
                 <a
-                  href={`https://btcpay.bitcoin-tx.com/stores/${state.data.store.id}`}
+                 
+                  href={apiurl + '/stores/${state.data.store.id'}
                   target="_blank"
                   rel="noopener noreferrer"
                 >

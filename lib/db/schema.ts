@@ -7,7 +7,6 @@ import {
   integer,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
-import { smallint } from 'drizzle-orm/gel-core';
 
 export const users = pgTable('users', {
   id: serial('id').primaryKey(),

@@ -628,15 +628,7 @@ export const createStore = async (
 
 
 
-  // This query checks if the user has a store by looking for a record in the 'users' table
-  // where the 'stores' column is set to "1" (indicating a store exists).
-  // let existingUserStores = await db
-  // .select()
-  // .from(users)
-  // .where(eq(users.stores, "1"))
-  // .limit(1);
-
- // Check if user already exists
+  // Check if user already has a store
  let existingUserStores = await db
  .select()
  .from(users)
@@ -777,37 +769,37 @@ export const createStore = async (
       failedItems.push("LBTC wallet");
     }
 
-    // Step x: Create USDt wallet
+    // Step x: Create USDT wallet
     try {
-      const USDtWalletUrl = `${btcpayUrl}/api/v1/stores/${storeId}/payment-methods/USDt/wallet/generate`;
-      const USDtWalletResponse = await fetch(
-        USDtWalletUrl,
+      const usdtWalletUrl = `${btcpayUrl}/api/v1/stores/${storeId}/payment-methods/USDT/wallet/generate`;
+      const usdtWalletResponse = await fetch(
+        usdtWalletUrl,
         walletRequestOptions
       );
 
-      if (USDtWalletResponse.ok) {
-        const USDtWalletData = await USDtWalletResponse.json();
-        createdItems.push("USDt wallet");
-        data.USDtWallet = USDtWalletData;
+      if (usdtWalletResponse.ok) {
+        const usdtWalletData = await usdtWalletResponse.json();
+        createdItems.push("USDT wallet");
+        data.usdtWallet = usdtWalletData;
       } else {
-        failedItems.push("USDt wallet");
+        failedItems.push("USDT wallet");
       }
     } catch {
-      failedItems.push("USDt wallet");
+      failedItems.push("USDT wallet");
     }
 
     // Step x: Create LCAD wallet
     try {
-      const LCADWalletUrl = `${btcpayUrl}/api/v1/stores/${storeId}/payment-methods/LCAD/wallet/generate`;
-      const LCADWalletResponse = await fetch(
-        LCADWalletUrl,
+      const lcadWalletUrl = `${btcpayUrl}/api/v1/stores/${storeId}/payment-methods/LCAD/wallet/generate`;
+      const lcadWalletResponse = await fetch(
+        lcadWalletUrl,
         walletRequestOptions
       );
 
-      if (LCADWalletResponse.ok) {
-        const LCADWalletData = await LCADWalletResponse.json();
+      if (lcadWalletResponse.ok) {
+        const lcadWalletData = await lcadWalletResponse.json();
         createdItems.push("LCAD wallet");
-        data.LCADWallet = LCADWalletData;
+        data.lcadWallet = lcadWalletData;
       } else {
         failedItems.push("LCAD wallet");
       }

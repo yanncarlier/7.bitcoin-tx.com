@@ -81,7 +81,7 @@ export default function Hero() {
               pull payments, payouts, and reports. <br />
               Plugins: Integrate with Shopify, POS systems, pay buttons,
               crowdfunding campaigns and more. <br />
-              Filosophy: Transparent and customizable technology.
+              Philosophy: Transparent and customizable technology.
             </CardContent>
           </Card>
         </div>
